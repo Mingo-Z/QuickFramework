@@ -1,0 +1,10 @@
+.project
+*.log
+test.php
+.idea
+*__
+*.pid
+Test
+.DS_Store
+vendor
+.env
