@@ -7,12 +7,21 @@ class ProcessManagerProvider extends Provider
     protected static $workersPid = [];
     protected static $logFilePath = '/dev/null';
 
-    public static function worker($name, callable $callback, array $arguments = [])
+    public static function addWorker($name, callable $callback, array $arguments = [])
     {
         self::$workers[$name] = [
+            'name' => $name,
             'callback' => $callback,
             'arguments' => $arguments,
         ];
+    }
+
+    public static function addWorkers($name, callable $callback, $num, array $arguments = [])
+    {
+        $num = (int)max($num, 1);
+        while ($num-- > 0) {
+            self::addWorker("{$name}_$num", $callback, $arguments);
+        }
     }
 
     protected static function runWorker(array $worker)
@@ -26,7 +35,7 @@ class ProcessManagerProvider extends Provider
         }
     }
 
-    public static function runAll()
+    public static function runWorkers()
     {
         foreach (self::$workers as $worker) {
             self::runWorker($worker);
@@ -71,7 +80,7 @@ class ProcessManagerProvider extends Provider
                     $STDERR = fopen(self::$logFilePath, 'ab');
                 }
                 self::signal();
-                self::runAll();
+                self::runWorkers();
                 while (1) {
                     $status = 0;
                     $exitPid = pcntl_wait($status);

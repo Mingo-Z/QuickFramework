@@ -42,7 +42,7 @@ class JobManager
 
     public static function daemon(WorkerJob $job)
     {
-        ProcessManagerProvider::worker($job->getName(), function () use ($job) {
+        ProcessManagerProvider::addWorker($job->getName(), function () use ($job) {
             while (1) {
                 $taskJob = $job->take();
                 if ($taskJob) {
