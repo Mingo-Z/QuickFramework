@@ -137,17 +137,19 @@ class Dispatcher
             $controllerInstance = new $class($this->app);
             $result = $controllerInstance->{$this->actionName}();
             $response = $this->app->response;
+            $resIsResponseObj = false;
             if (!is_null($result)) {
                 if (is_object($result)) {
                     if ($result instanceof Response) {
                         $response = $result;
+                        $resIsResponseObj = true;
                     } elseif (method_exists($result, '__toString')) {
                         $result = (string)$result;
                     }
                 }
                 if (is_scalar($result)) { // int,float,string,bool
                     $response->setContent($result);
-                } else {
+                } elseif (!$resIsResponseObj) {
                     $response->setJsonContent($result);
                 }
             }
