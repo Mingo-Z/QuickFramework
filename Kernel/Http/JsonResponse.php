@@ -3,7 +3,6 @@ namespace Qf\Kernel\Http;
 
 class JsonResponse extends Response
 {
-
     protected $businessCode;
     protected $businessCodeDesc;
     protected $data;
@@ -23,22 +22,21 @@ class JsonResponse extends Response
 
     public function setJsonContent($var)
     {
-        if (!is_resource($var)) {
-            $this->content = $var;
-            $this->setContentType('application/json');
-        }
-
-        return $this;
+        return parent::setJsonContent($var);
     }
 
+    protected function getJsonBody()
+    {
+        return json_encode([
+            'businessCode' => $this->businessCode,
+            'businessCodeDesc' => $this->businessCodeDesc,
+            'data' => $this->content,
+        ]);
+    }
 
     protected function _sendContent()
     {
-        $this->content = json_encode([
-            'code' => $this->businessCode,
-            'desc' => $this->businessCodeDesc,
-            'data' => $this->content,
-        ]);
+        $this->content = $this->getJsonBody();
         parent::_sendContent();
     }
 }
