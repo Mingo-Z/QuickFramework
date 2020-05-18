@@ -5,9 +5,9 @@ use Qf\Components\Facades\Cookie;
 
 class Response
 {
-    public $version;
+    protected $version;
 
-    public static $statusCodeToTexts = array(
+    protected static $statusCodeToTexts = array(
         100 => 'Continue',
         101 => 'Switching Protocols',
         102 => 'Processing',            // RFC2518
@@ -76,7 +76,7 @@ class Response
      *
      * @var string
      */
-    public $contentType;
+    protected $contentType;
     /**
      * HTTP状态码
      *
@@ -96,7 +96,7 @@ class Response
      *
      * @var mixed
      */
-    public $content;
+    protected $content;
 
     /**
      * 响应头部

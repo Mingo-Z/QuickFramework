@@ -5,7 +5,6 @@ class JsonResponse extends Response
 {
     protected $businessCode;
     protected $businessCodeDesc;
-    protected $data;
 
     public function setBusinessCodeAndDesc($code = 0, $desc = '')
     {
@@ -20,9 +19,11 @@ class JsonResponse extends Response
         return $this->setJsonContent($content);
     }
 
-    public function setJsonContent($var)
+    public function setJsonContent($content)
     {
-        return parent::setJsonContent($var);
+        $this->setContentType('application/json');
+        $this->content = $content;
+        return $this;
     }
 
     protected function getJsonBody()
