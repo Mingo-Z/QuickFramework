@@ -1,6 +1,6 @@
 <?php
 $appConfigManagerConfig = [];
-$appConfigManagerFile = AppConfigsPath . 'components.config.php';
+$appConfigManagerFile = AppConfigsPath . 'configmanager.config.php';
 if (is_file($appConfigManagerFile)) {
     $appConfigManagerConfig = require $appConfigManagerFile;
 }
