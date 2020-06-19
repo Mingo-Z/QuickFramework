@@ -45,7 +45,7 @@ class ExceptionErrorHandle
 
     protected static function dumpBacktrace(array $backtrace)
     {
-        echo join("\n", $backtrace);
+        echo join(isPhpCommandMode() ? "\n" : "<br />", $backtrace);
     }
 
     public static function processBacktrace(array $backtrace, $jumpLevel = 0)
