@@ -502,7 +502,7 @@ function translate()
 
 function isDebug()
 {
-    return envIniConfig('AppIsDebug', 'global', true);
+    return envIniConfig('appIsDebug', 'global', true);
 }
 
 
