@@ -1,6 +1,8 @@
 <?php
 namespace Qf\Kernel;
 
+use Qf\Kernel\Http\HttpException;
+
 class ExceptionErrorHandle
 {
     public static function exceptionHandle($e) // Before php7 Exception class not extends Throwable
@@ -15,16 +17,8 @@ class ExceptionErrorHandle
                 $backtrace[] = $message;
                 self::dumpBacktrace($backtrace);
             }
-            if ($e instanceof Exception) {
-                switch ($e->getCode()) {
-                    case Exception::HTTP_STATUS_CODE_404:
-                        self::http404Handle($e);
-                        break;
-                    case Exception::HTTP_STATUS_CODE_403:
-                        self::http403Handle($e);
-                        break;
-                    default:
-                }
+            if ($e instanceof HttpException) {
+                self::httpErrorHandle($e);
             }
         }
     }
@@ -88,13 +82,12 @@ class ExceptionErrorHandle
         set_exception_handler(__CLASS__ . '::exceptionHandle');
     }
 
-    protected static function http404Handle(Exception $e)
+    protected static function httpErrorHandle(HttpException $e)
     {
-
-    }
-
-    protected static function http403Handle(Exception $e)
-    {
-
+        $statusCode = $e->getCode();
+        $message = $e->getMessage();
+        $app = Application::getApp();
+        $responseObject = $app->response;
+        $responseObject->setCode($statusCode)->setContent($message)->setProcessed(true)->send()->stop();
     }
 }
