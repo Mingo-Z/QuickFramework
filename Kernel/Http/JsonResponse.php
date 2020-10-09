@@ -32,6 +32,7 @@ class JsonResponse extends Response
             'businessCode' => $this->businessCode,
             'businessCodeDesc' => $this->businessCodeDesc,
             'data' => $this->content,
+            'timestamp' => time(),
         ]);
     }
 
