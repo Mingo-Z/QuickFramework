@@ -81,7 +81,7 @@ class MySQLManagerProvider extends Provider
             if (!$this->result) {
                 throw new Exception($this->connection->error . ", SQL: $sql", $this->connection->errno);
             }
-            $this->lastExecQueryTime = microtime(true) - $startQueryTs;
+            $this->lastExecQueryTime = round(microtime(true) - $startQueryTs, 3);
             if (isDebug() && ($this->com->sqllog)) {
                 $this->com->sqllog->debug("SQL: $sql, Execution time: {$this->lastExecQueryTime}sec");
             }

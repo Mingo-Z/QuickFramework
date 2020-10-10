@@ -32,7 +32,7 @@ class Controller extends HttpController
         $command = strtolower($command);
         if (static::$runArgDefineArray) {
             if (!isset(static::$runArgDefineArray[$command])) {
-                throw new Exception(__CLASS__ . ": $command is not a command");
+                throw new Exception(static::class . ": $command is not a command");
             }
             $formattedArgs = isset($arguments[0]) ? (array)$arguments[0] : [];
             $formattedArgs = $this->formatRunArgs($command, $formattedArgs);
@@ -100,7 +100,7 @@ class Controller extends HttpController
 
     protected static function usage($command)
     {
-        Console::stdout('usage: ' . __CLASS__ . " $command\n");
+        Console::stdout('usage: ' . static::class . " $command\n");
         foreach (static::$runArgDefineArray[$command] as $name => $def) {
             $line = "\t{$def['prefix']}$name " . ((isset($def['required']) && $def['required']) ? 'required' : 'optional');
             if (isset($def['options']) && is_array($def['options'])) {
