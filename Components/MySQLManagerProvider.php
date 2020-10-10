@@ -83,7 +83,7 @@ class MySQLManagerProvider extends Provider
             }
             $this->lastExecQueryTime = microtime(true) - $startQueryTs;
             if (isDebug() && ($this->com->sqllog)) {
-                $this->com->sqllog->debug("SQL: $sql, Execute time: {$this->lastExecQueryTime}");
+                $this->com->sqllog->debug("SQL: $sql, Execution time: {$this->lastExecQueryTime}sec");
             }
         }
 

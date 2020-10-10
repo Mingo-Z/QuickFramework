@@ -293,7 +293,7 @@ class MysqlDistributedProvider extends Provider
             $startQueryTime = microtime(true);
             $this->cntResult = $this->connection->query($sql);
             $endQueryTime = microtime(true);
-            Application::getCom()->sqllog->debug($sql . ', Execution Time: ' . $endQueryTime - $startQueryTime . 'sec');
+            Application::getCom()->sqllog->debug('SQL: ' . $sql . ', Execution Time: ' . $endQueryTime - $startQueryTime . 'sec');
             $this->queryTimes++;
             if (!$this->cntResult) {
                 $this->error();
