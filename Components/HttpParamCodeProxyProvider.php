@@ -12,7 +12,7 @@ use Qf\Utils\HttpClient;
 
 class HttpParamCodeProxyProvider extends Provider
 {
-    const HTTP_REQUEST_USER_AGRNT = 'HttpParamCodeProxy';
+    const HTTP_REQUEST_USER_AGENT = 'HttpParamCodeProxy';
     const HTTP_REQUEST_METHOD_POST = 'POST';
     const HTTP_REQUEST_METHOD_GET = 'GET';
 
@@ -169,7 +169,7 @@ class HttpParamCodeProxyProvider extends Provider
     protected function getHttpHeaders()
     {
         if (!isset($this->headers['user-agent'])) {
-            $this->headers['user-agent'] = self::HTTP_REQUEST_USER_AGRNT;
+            $this->headers['user-agent'] = self::HTTP_REQUEST_USER_AGENT;
         }
         if ($this->isPost() && !isset($this->headers['content-type'])) {
             $this->headers['content-type'] = 'application/x-www-form-urlencoded';
