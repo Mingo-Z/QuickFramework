@@ -16,9 +16,9 @@ class PhoneLocationProvider extends Provider
     const SUPPORT_AREA_FILE_HEAD_LENGTH = 100;
     
     const SUPPORT_AREA_INDEX_LENGTH = 4;
-    const SUPPORT_AREA_MAX_NUMBER_LENGHT = 8;
-    const SUPPORT_AREA_MIN_NUMBER_LENGHT = 2;
-    const SUPPORT_AREA_MAX_NAME_LENGHT = 50;
+    const SUPPORT_AREA_MAX_NUMBER_LENGTH = 8;
+    const SUPPORT_AREA_MIN_NUMBER_LENGTH = 2;
+    const SUPPORT_AREA_MAX_NAME_LENGTH = 50;
     
     /**
      * 归属地数据文件路径
@@ -194,8 +194,8 @@ class PhoneLocationProvider extends Provider
             'suffixIndex' => 0
         );
 
-        if ($numIndexLen > self::SUPPORT_AREA_MAX_NUMBER_LENGHT) {
-            $numIndexLen = self::SUPPORT_AREA_MAX_NUMBER_LENGHT;
+        if ($numIndexLen > self::SUPPORT_AREA_MAX_NUMBER_LENGTH) {
+            $numIndexLen = self::SUPPORT_AREA_MAX_NUMBER_LENGTH;
         } elseif ($numIndexLen < self::SUPPORT_AREA_INDEX_LENGTH) {
             $numIndexLen = self::SUPPORT_AREA_INDEX_LENGTH;
         }
@@ -278,11 +278,11 @@ class PhoneLocationProvider extends Provider
                                         $nodeInfo = unpack('vnameOffset/vtypeOffset', fread($this->fileDbHandle, 4));
                                         if ($nodeInfo['nameOffset']) {
                                             fseek($this->fileDbHandle, $this->fileDbHeadInfo['nameDataOffset'] + $nodeInfo['nameOffset'], SEEK_SET);
-                                            $string = fread($this->fileDbHandle, self::SUPPORT_AREA_MAX_NAME_LENGHT * 2);
+                                            $string = fread($this->fileDbHandle, self::SUPPORT_AREA_MAX_NAME_LENGTH * 2);
                                             $ret['location'] = substr($string, 0, strpos($string, "\x00"));
                                             if ($nodeInfo['typeOffset']) {
                                                 fseek($this->fileDbHandle, $this->fileDbHeadInfo['nameDataOffset'] + $nodeInfo['typeOffset'], SEEK_SET);
-                                                $string = fread($this->fileDbHandle, self::SUPPORT_AREA_MAX_NAME_LENGHT * 2);
+                                                $string = fread($this->fileDbHandle, self::SUPPORT_AREA_MAX_NAME_LENGTH * 2);
                                                 $ret['sp'] = substr($string, 0, strpos($string, "\x00"));
                                             }
                                             $numLocations[$num] = $ret;
