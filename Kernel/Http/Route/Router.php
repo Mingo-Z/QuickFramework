@@ -1,12 +1,10 @@
 <?php
 namespace Qf\Kernel\Http\Route;
 
-use Qf\Kernel\Application;
 use Qf\Kernel\Exception;
 use Qf\Kernel\Http\Dispatcher;
 use Qf\Kernel\Http\Route\Rule\QueryRule;
 use Qf\Kernel\Http\Route\Rule\RewriteRule;
-use Qf\Kernel\Http\Route\Rule\Rule;
 
 class Router
 {

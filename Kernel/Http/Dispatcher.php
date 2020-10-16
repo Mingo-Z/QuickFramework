@@ -14,6 +14,7 @@ class Dispatcher
     protected $defaultControllerName;
     protected $defaultActionName;
 
+    protected $options;
     protected $app;
     protected $isProcessed;
 
@@ -22,6 +23,7 @@ class Dispatcher
         $this->defaultModuleName = envIniConfig('defaultModuleName', 'http');
         $this->defaultControllerName = envIniConfig('defaultControllerName', 'http', 'Index');
         $this->defaultActionName = envIniConfig('defaultActionName', 'http', 'Index');
+        $this->options = $options;
         $this->app = Application::getApp();
         $this->isProcessed = true;
     }
