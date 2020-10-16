@@ -280,7 +280,7 @@ class Request
         return $this->isRequestMethod(self::HTTP_REQUEST_METHOD_PUT);
     }
 
-    protected function isRequestMethod($method)
+    public function isRequestMethod($method)
     {
         return isset($_SERVER['REQUEST_METHOD']) && $_SERVER['REQUEST_METHOD'] == $method;
     }

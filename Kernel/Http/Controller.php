@@ -27,6 +27,18 @@ abstract class Controller
     {
         $methodName = $method . 'Action';
         if (method_exists($this, $methodName)) {
+            /**
+             * http request method check
+             * @todo Affect execution efficiency
+             */
+            $reflectClassMethod = new \ReflectionMethod($this, $methodName);
+            $methodDocComment = $reflectClassMethod->getDocComment();
+            if ($methodDocComment && preg_match('@\@http\.request\.method\s*=\s*(post|get|put)@i', $methodDocComment, $matches)) {
+                if (!$this->app->request->isRequestMethod(strtoupper($matches[1]))) {
+                    throw new Exception('Controller ' . static::class. "::$methodName method request {$matches[1]} access", Exception::HTTP_STATUS_CODE_403);
+                }
+            }
+            
             $beforeMethod = "before$method";
             $afterMethod = "after$method";
             if (method_exists($this, $beforeMethod)) {
