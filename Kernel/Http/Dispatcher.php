@@ -14,34 +14,28 @@ class Dispatcher
     protected $defaultControllerName;
     protected $defaultActionName;
 
-    protected $isUrlRewrite;
-    protected $uriBasePath;
-
     protected $app;
     protected $isProcessed;
 
-    private function __construct(array $config, Application $app)
+    private function __construct(array $options = null)
     {
-        $this->defaultModuleName = isset($config['defaultModuleName']) ? $config['defaultModuleName'] : null;
-        $this->defaultControllerName = isset($config['defaultControllerName']) ? $config['defaultControllerName'] : 'Index';
-        $this->defaultActionName = isset($config['defaultActionName']) ? $config['defaultActionName'] : 'Index';
-        $this->isUrlRewrite = isset($config['isUriRewrite']) ? (bool)$config['isUriRewrite'] : false;
-        $this->app = $app;
+        $this->defaultModuleName = envIniConfig('defaultModuleName', 'http');
+        $this->defaultControllerName = envIniConfig('defaultControllerName', 'http', 'Index');
+        $this->defaultActionName = envIniConfig('defaultActionName', 'http', 'Index');
+        $this->app = Application::getApp();
         $this->isProcessed = true;
     }
 
     /**
      * 初始实例化该类
      *
-     * @param boolean $isRewrite 是否开启URI重写
-     * @param string $modulesPath module文件基础路径
      * @return Dispatcher
      */
-    public static function getInstance(array $config, Application $app)
+    public static function getInstance(array $options = null)
     {
         static $instance;
         if (!$instance) {
-            $instance = new self($config, $app);
+            $instance = new self($options);
         }
         return $instance;
     }
@@ -49,6 +43,15 @@ class Dispatcher
     public function getControllerName()
     {
         return $this->controllerName;
+    }
+
+    public function setControllerName($name)
+    {
+        if ($name) {
+            $this->controllerName = $name;
+        }
+
+        return $this;
     }
 
     /**
@@ -61,6 +64,15 @@ class Dispatcher
         return $this->moduleName;
     }
 
+    public function setModuleName($name)
+    {
+        if ($name) {
+            $this->moduleName = $name;
+        }
+
+        return $this;
+    }
+
     /**
      * 获取当前请求action
      *
@@ -71,48 +83,31 @@ class Dispatcher
         return $this->actionName;
     }
 
+    public function setActionName($name)
+    {
+        if ($name) {
+            $this->actionName = $name;
+        }
+
+        return $this;
+    }
+
     public function setProcessed($bool = true)
     {
         $this->isProcessed = $bool;
     }
 
     /**
-     * URI解析验证module、action
+     * URI解析验证module、controller、action
      */
     public function dispatch()
     {
-        $moduleName = '';
-        $controllerName = '';
-        $actionName = '';
-        $requestUri = $_SERVER['REQUEST_URI'];
-        if (($pos = strpos($requestUri, '?')) !== false) {
-            $requestUri = substr($requestUri, 0, $pos);
-        }
-        if (!$this->isUrlRewrite) {
-            $moduleName = isset($_REQUEST['m']) ? $_REQUEST['m'] : '';
-            $controllerName = isset($_REQUEST['c']) ? $_REQUEST['c'] : '';
-            $actionName = isset($_REQUEST['action']) ? $_REQUEST['action'] : '';
-        } else {
-            if ($this->uriBasePath) {
-                $requestUri = str_replace($this->uriBasePath, '', $requestUri);
-            }
-            $requestUri = trim($requestUri, '/');
-            $requestUriArray = array_filter(explode('/', $requestUri));
-            if (count($requestUriArray) >= 3) {
-                $moduleName = isset($requestUriArray[0]) ? $requestUriArray[0] : '';
-                $controllerName = isset($requestUriArray[1]) ? $requestUriArray[1] : '';
-                $actionName = isset($requestUriArray[2]) ? $requestUriArray[2] : '';
-            } else {
-                $controllerName = isset($requestUriArray[0]) ? $requestUriArray[0] : '';
-                $actionName = isset($requestUriArray[1]) ? $requestUriArray[1] : '';
-            }
-        }
-        $this->moduleName = $moduleName ?: $this->defaultModuleName;
-        $this->controllerName = $controllerName ?: $this->defaultControllerName;
-        $this->actionName = $actionName ?: $this->defaultActionName;
+        $this->moduleName = $this->moduleName ?? $this->defaultModuleName;
+        $this->controllerName = $this->controllerName ?? $this->defaultControllerName;
+        $this->actionName = $this->actionName ?? $this->defaultActionName;
 
         if (!$this->controllerName || !$this->actionName) {
-            throw new Exception("Request uri: $requestUri resource does not exist", Exception::HTTP_STATUS_CODE_404);
+            throw new Exception("Request uri: {$_SERVER['REQUEST_URI']} resource does not exist", Exception::HTTP_STATUS_CODE_404);
         }
         if ($this->moduleName) {
             $this->moduleName = ucfirst(strtolower($this->moduleName));

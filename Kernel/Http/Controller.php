@@ -39,7 +39,7 @@ abstract class Controller
 
             return $result;
         } else {
-            throw new Exception('Controller ' . __CLASS__ . "::$methodName method does not exists", Exception::HTTP_STATUS_CODE_404);
+            throw new Exception('Controller ' . static::class. "::$methodName method does not exists", Exception::HTTP_STATUS_CODE_404);
         }
     }
 

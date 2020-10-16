@@ -5,6 +5,7 @@ use Qf\Kernel\Http\Dispatcher;
 use Qf\Kernel\Http\Middleware\MiddlewareManager;
 use Qf\Kernel\Http\Request;
 use Qf\Kernel\Http\Response;
+use Qf\Kernel\Http\Route\Router;
 use Qf\Localization\Localization;
 use Qf\Utils\FileHelper;
 
@@ -119,11 +120,8 @@ class Application
     {
         $this->request = (new Request())->init();
         $this->response = new Response($this->request);
-        $uriRouteConfigArray = [];
-        if (self::getCom()->config->app->uriRouteConfig) {
-            $uriRouteConfigArray = self::getCom()->config->app->uriRouteConfig->toArray();
-        }
-        $this->dispatcher = Dispatcher::getInstance($uriRouteConfigArray, $this);
+        $router = Router::getInstance();
+        $this->dispatcher = $router->getDispatcher();
         $this->dispatcher->dispatch()->execute();
     }
 
