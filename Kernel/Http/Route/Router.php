@@ -3,6 +3,7 @@ namespace Qf\Kernel\Http\Route;
 
 use Qf\Kernel\Exception;
 use Qf\Kernel\Http\Dispatcher;
+use Qf\Kernel\Http\Middleware\MiddlewareManager;
 use Qf\Kernel\Http\Route\Rule\QueryRule;
 use Qf\Kernel\Http\Route\Rule\RewriteRule;
 
@@ -57,6 +58,9 @@ class Router
      */
     public function getDispatcher()
     {
+        MiddlewareManager::triggerMiddleware(MiddlewareManager::TRIGGER_STAGE_HTTP_ROUTE);
+
+        // http route
         $ruleName = envIniConfig('routeRuleName', 'http', 'Query');
         $ruleOptions = envIniConfig('ruleOptions', 'http');
         $rule = $this->getRuleClass($ruleName);

@@ -7,6 +7,7 @@ use Closure;
 class MiddlewareManager
 {
     const TRIGGER_STAGE_HTTP_ROUTE = 'http-route';
+    const TRIGGER_STAGE_HTTP_DISPATCH = 'http-dispatch';
     const TRIGGER_STAGE_HTTP_RESPONSE_BEFORE = 'http-response-before';
     const TRIGGER_STAGE_HTTP_RESPONSE_AFTER = 'http-response-after';
 
@@ -39,7 +40,7 @@ class MiddlewareManager
         return $middlewareArray;
     }
 
-    public static function triggerMiddleware($stageName, Application $app, $module = null)
+    public static function triggerMiddleware($stageName, $module = null)
     {
         $stack = null;
         $module = $module ?: 'default';
@@ -57,6 +58,6 @@ class MiddlewareManager
             });
         }
 
-        return $stack ? $stack($app) : null;
+        return $stack ? $stack(Application::getApp()) : null;
     }
 }

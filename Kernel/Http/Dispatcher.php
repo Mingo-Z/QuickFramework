@@ -115,7 +115,7 @@ class Dispatcher
             $this->moduleName = ucfirst(strtolower($this->moduleName));
         }
 
-        MiddlewareManager::triggerMiddleware(MiddlewareManager::TRIGGER_STAGE_HTTP_ROUTE, $this->app, $this->moduleName);
+        MiddlewareManager::triggerMiddleware(MiddlewareManager::TRIGGER_STAGE_HTTP_DISPATCH, $this->moduleName);
 
         return $this;
     }
@@ -150,11 +150,11 @@ class Dispatcher
                     $response->setJsonContent($result);
                 }
             }
-            MiddlewareManager::triggerMiddleware(MiddlewareManager::TRIGGER_STAGE_HTTP_RESPONSE_BEFORE, $this->app, $this->moduleName);
+            MiddlewareManager::triggerMiddleware(MiddlewareManager::TRIGGER_STAGE_HTTP_RESPONSE_BEFORE, $this->moduleName);
 
             $response->setProcessed(true)->send();
 
-            MiddlewareManager::triggerMiddleware(MiddlewareManager::TRIGGER_STAGE_HTTP_RESPONSE_AFTER, $this->app, $this->moduleName);
+            MiddlewareManager::triggerMiddleware(MiddlewareManager::TRIGGER_STAGE_HTTP_RESPONSE_AFTER, $this->moduleName);
 
         }
     }

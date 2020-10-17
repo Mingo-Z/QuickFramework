@@ -38,7 +38,7 @@ abstract class Controller
                     throw new Exception('Controller ' . static::class. "::$methodName method request {$matches[1]} access", Exception::HTTP_STATUS_CODE_403);
                 }
             }
-            
+
             $beforeMethod = "before$method";
             $afterMethod = "after$method";
             if (method_exists($this, $beforeMethod)) {
