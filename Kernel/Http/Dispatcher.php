@@ -111,9 +111,6 @@ class Dispatcher
         if (!$this->controllerName || !$this->actionName) {
             throw new Exception("Request uri: {$_SERVER['REQUEST_URI']} resource does not exist", Exception::HTTP_STATUS_CODE_404);
         }
-        if ($this->moduleName) {
-            $this->moduleName = ucfirst(strtolower($this->moduleName));
-        }
 
         MiddlewareManager::triggerMiddleware(MiddlewareManager::TRIGGER_STAGE_HTTP_DISPATCH, $this->moduleName);
 
