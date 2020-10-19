@@ -64,7 +64,12 @@ class Application
             FileHelper::includeFiles($appPreloadIncludeFiles);
         }
 
+        // Localized configuration
         self::$locale = new Localization(envIniConfig('locale', 'global', 'en'));
+        $timezone = envIniConfig('timezone', 'global');
+        if ($timezone) {
+            date_default_timezone_set($timezone);
+        }
     }
 
     protected static function registerMiddleware()
