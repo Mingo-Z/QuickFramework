@@ -80,7 +80,8 @@ class Application
                 foreach ($middlewareConfigArray as $middlewareConfig) {
                     if (is_array($middlewareConfig) && isset($middlewareConfig[1])) {
                         $module = $middlewareConfig[2] ?? null;
-                        MiddlewareManager::register($middlewareConfig[0], $middlewareConfig[1], $module);
+                        $config = $middlewareConfig[3] ?? null;
+                        MiddlewareManager::register($middlewareConfig[0], $middlewareConfig[1], $module, $config);
                     }
                 }
             }

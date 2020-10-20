@@ -6,7 +6,7 @@ use Closure;
 
 abstract class Middleware
 {
-    public static function handle(Application $app, Closure $next = null)
+    public static function handle(Application $app, Closure $next = null, $config = null)
     {
         $result = null;
         if ($next) {

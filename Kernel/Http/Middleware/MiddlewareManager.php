@@ -13,7 +13,7 @@ class MiddlewareManager
 
     protected static $registeredMiddlewareArray;
 
-    public static function register($stageName, $middleware, $module = null)
+    public static function register($stageName, $middleware, $module = null, $config = null)
     {
         $module = $module ?: 'default';
         if (!is_subclass_of($middleware, Middleware::class) && !($middleware instanceof Closure)) {
@@ -22,7 +22,7 @@ class MiddlewareManager
         if (!isset(self::$registeredMiddlewareArray[$stageName])) {
             self::$registeredMiddlewareArray[$stageName][$module] = [];
         }
-        self::$registeredMiddlewareArray[$stageName][$module][] = $middleware;
+        self::$registeredMiddlewareArray[$stageName][$module][] = [$middleware, $config];
     }
 
     public static function getRegisteredMiddlewareArray($stageName = null, $module = null)
@@ -46,14 +46,16 @@ class MiddlewareManager
         $module = $module ?: 'default';
         $middlewareArray = self::getRegisteredMiddlewareArray($stageName, $module);
         if ($middlewareArray) {
-            $stack = array_reduce(array_reverse($middlewareArray), function ($next, $middleware) {
-                return function ($app) use ($next, $middleware) {
+            $stack = array_reduce(array_reverse($middlewareArray), function ($next, $current) {
+                return function ($app) use ($next, $current) {
+                    $middleware = $current[0];
+                    $middlewareConfig = $current[1];
                     if ($middleware instanceof Closure) {
                         $callable = $middleware;
                     } else {
                         $callable = [$middleware, 'handle'];
                     }
-                    return call_user_func_array($callable, [$app, $next]);
+                    return call_user_func_array($callable, [$app, $next, $middlewareConfig]);
                 };
             });
         }
