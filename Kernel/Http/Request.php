@@ -338,7 +338,14 @@ class Request
         $code = '';
         $params = array();
         if ($this->isPost()) {
-            $params = $this->getOrigGpcssArray(self::HTTP_REQUEST_VAR_POST);
+            if ($this->isRequestJson()) {
+                $params = json_decode($this->getRawBody(), true);
+                if (!is_array($params)) {
+                    $params = [];
+                }
+            } else {
+                $params = $this->getOrigGpcssArray(self::HTTP_REQUEST_VAR_POST);
+            }
         } elseif ($this->isGet()) {
             $params = $this->getOrigGpcssArray(self::HTTP_REQUEST_VAR_GET);
         }
