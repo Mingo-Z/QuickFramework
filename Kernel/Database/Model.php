@@ -170,7 +170,7 @@ abstract class Model
     {
         $columns = [];
         foreach ($this->tableColumnsName as $columnName) {
-            if (!is_null($this->$columnName)) {
+            if (property_exists($this, $columnName)) {
                 $columns[$columnName] = $this->$columnName;
             }
         }
