@@ -47,16 +47,21 @@ class JobManager
             while (1) {
                 $taskJob = $job->take();
                 if ($taskJob) {
+                    $isPcntlAlarmTimeout = false;
                     if ($taskJob->timeout > 0 && ProcessManagerProvider::isSupportAsyncSignal()) {
                         pcntl_async_signals(true);
                         pcntl_signal(SIGALRM, function () use ($taskJob) {
                             ExceptionErrorHandle::exceptionHandle(new JobException("Job exceeded the maximum running time of {$taskJob->timeout} seconds",
                                 0, null, $taskJob));
+                            die();
                         });
-                        die();
+                        pcntl_alarm($taskJob->timeout);
+                        $isPcntlAlarmTimeout = true;
                     }
                     self::runWorkerJob($taskJob);
-                    pcntl_alarm(0);
+                    if ($isPcntlAlarmTimeout) {
+                        pcntl_alarm(0);
+                    }
                 } else {
                     time_nanosleep(0, 1000);
                 }
