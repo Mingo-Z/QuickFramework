@@ -29,7 +29,7 @@ abstract class WorkerJob extends Job
 
     protected $delay;
 
-    protected function __construct(array $job, $queue = null)
+    protected function __construct(array $job = null, $queue = null)
     {
         $this->job = $job;
         $this->queue = $queue;
@@ -72,7 +72,7 @@ abstract class WorkerJob extends Job
         static $instances = [];
 
         if (!$this->connectionName || !$this->driverClass) {
-            throw new Exception(__CLASS__ . "connectionName, driverClass property must be set");
+            throw new Exception(static::class . "connectionName, driverClass property must be set");
         }
         $instanceId = $this->driverClass . ':' . $this->connectionName;
         if (!isset($instances[$instanceId])) {
@@ -108,6 +108,11 @@ abstract class WorkerJob extends Job
         return $this;
     }
 
+    /**
+     * Instantiate an empty object without parameters for task processing
+     *
+     * @return WorkerJob
+     */
     public static function create()
     {
         return new static(...func_get_args());
@@ -119,7 +124,7 @@ abstract class WorkerJob extends Job
     public function dispatch()
     {
         $this->setCallback();
-        $this->resolveDriver()->release($this, $this->delay, $this->getQueue());
+        return $this->resolveDriver()->release($this, $this->delay, $this->getQueue());
     }
 
     protected function setCallback()
