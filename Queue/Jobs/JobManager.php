@@ -8,7 +8,7 @@ use Qf\Kernel\ExceptionErrorHandle;
 class JobManager
 {
     /**
-     * @param string $workerJobClass
+     * @param string $workerJobClass include all namespaces class name, eg: App\Jobs\MessageWorkerJob
      * @param string|null $name
      * @param array|null $body
      * @return WorkerJob
@@ -16,17 +16,10 @@ class JobManager
      */
     public static function createWorkerJob($workerJobClass, $name = null, array $body = null)
     {
-        $class = $workerJobClass;
-        if (strncmp($class, 'Jobs', 4)) {
-            $class = 'Jobs\\' . $class;
+        if (!class_exists($workerJobClass, true)) {
+            throw new JobException("$workerJobClass job class does not exists");
         }
-        $classFile = AppPath . str_replace('\\', '/', $class) . '.php';
-        if (is_file($classFile)) {
-            require_once $classFile;
-        }
-        if (!class_exists($workerJobClass, false)) {
-            throw new JobException("$class Job not exists");
-        }
+
         $idGenerator = new IdGeneratorProvider();
         $rawJob = [
             'id' => $idGenerator->getId(),
@@ -38,7 +31,7 @@ class JobManager
             'createdAt' => time(),
         ];
 
-        return $class::create($rawJob);
+        return $workerJobClass::create($rawJob);
     }
 
     public static function daemon(WorkerJob $job)
@@ -73,8 +66,7 @@ class JobManager
 
     public static function runWorkerJob(WorkerJob $workerJob)
     {
-        $workerJob->work();
-        if ($workerJob->tries > $workerJob->getAttempts()) {
+        if (!$workerJob->work() && $workerJob->tries > $workerJob->getAttempts()) {
             $workerJob->release($workerJob->getDelay());
         }
     }
