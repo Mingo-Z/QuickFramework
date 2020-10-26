@@ -48,9 +48,12 @@ abstract class WorkerJob extends Job
         ];
     }
 
+    /**
+     * @return bool
+     */
     public function work()
     {
-        $this->handle();
+        return $this->handle();
     }
 
     public function getDelay()
@@ -161,6 +164,9 @@ abstract class WorkerJob extends Job
         return $job;
     }
 
+    /**
+     * @return bool
+     */
     abstract protected function handle();
 
     public function getQueue()
