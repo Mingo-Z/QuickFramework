@@ -47,7 +47,6 @@ class Application
         self::$com = new ComponentManager();
         self::$com->configFile = FrameworkConfigsPath . 'components.config.php';
 
-        ExceptionErrorHandle::installHandle();
         // vendor 第三方类库自动加载
         if (is_file(FrameworkVendorPath . 'autoload.php')) {
             FileHelper::includeFile(FrameworkVendorPath . 'autoload.php');
@@ -55,9 +54,7 @@ class Application
         if (is_file(AppPath . 'vendor/autoload.php')) {
             FileHelper::includeFile(AppPath . 'vendor/autoload.php');
         }
-
         self::registerMiddleware();
-
         // 预加载应用全局公共文件
         if (self::$com->config->app->preloadIncludeFiles) {
             $appPreloadIncludeFiles = self::$com->config->app->preloadIncludeFiles->toArray();
@@ -70,6 +67,8 @@ class Application
         if ($timezone) {
             date_default_timezone_set($timezone);
         }
+
+        ExceptionErrorHandle::installHandle();
     }
 
     protected static function registerMiddleware()
