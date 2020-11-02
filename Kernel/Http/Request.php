@@ -37,6 +37,22 @@ class Request
     protected $filteredArgv;
 
     /**
+     * raw request body, eg: json or xml
+     *
+     * @var string
+     */
+    protected $origNoNormalBody;
+
+    /**
+     * json or xml to array
+     *
+     * @var array
+     */
+    protected $origNoNormalArray;
+
+    protected $filteredNoNormalArray;
+
+    /**
      * 过滤后的用户cookie，为重用Cookie类实现
      * 暂时不使用
      *
@@ -57,6 +73,9 @@ class Request
         $this->requestHeaders = [];
 
         $this->origGpcssVarArray = [];
+
+        $this->origNoNormalArray = [];
+        $this->filteredNoNormalArray = [];
     }
 
     public function setData($key, $value)
@@ -85,6 +104,9 @@ class Request
             $this->filteredGetVar = $this->filterArrayVar($_GET);
             $this->filteredGetPostVar = array_merge($this->filteredGetVar, $this->filteredPostVar);
             $this->filteredCookieVar = $this->filterArrayVar($_COOKIE);
+
+            // parse no normal request content-type,eg: json or xml
+            $this->parseNoNormalBody();
         } else {
             $this->origGpcssVarArray = [
                 self::HTTP_REQUEST_VAR_SERVER => $_SERVER,
@@ -131,6 +153,32 @@ class Request
     public function __get($name)
     {
         return isset($this->filteredGetPostVar[$name]) ? $this->filteredGetPostVar[$name] : null;
+    }
+
+    protected function parseNoNormalBody()
+    {
+        if ($this->isRequestJson()) {
+            $this->origNoNormalBody = $this->getRawBody();
+            if ($this->origNoNormalBody) {
+                $this->origNoNormalArray = (array)json_decode($this->origNoNormalBody, true);
+                $this->filteredNoNormalArray = $this->filterArrayVar($this->origNoNormalArray);
+            }
+        }
+    }
+
+    public function getOrigNoNormalValue($key = null, $default = null)
+    {
+        return $key ? ($this->origNoNormalArray[$key] ?? $default) : $this->origNoNormalArray;
+    }
+
+    public function getFilteredNoNormalValue($key = null, $default = null)
+    {
+        return $key ? ($this->filteredNoNormalArray[$key] ?? $default) : $this->filteredNoNormalArray;
+    }
+
+    public function getOrigNoNormalBody()
+    {
+        return $this->origNoNormalBody;
     }
 
     /**
@@ -339,10 +387,7 @@ class Request
         $params = array();
         if ($this->isPost()) {
             if ($this->isRequestJson()) {
-                $params = json_decode($this->getRawBody(), true);
-                if (!is_array($params)) {
-                    $params = [];
-                }
+                $params = $this->getOrigNoNormalValue();
             } else {
                 $params = $this->getOrigGpcssArray(self::HTTP_REQUEST_VAR_POST);
             }
