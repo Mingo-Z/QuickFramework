@@ -3,42 +3,53 @@ namespace Qf\Kernel\Http;
 
 class JsonResponse extends Response
 {
-    protected $businessCode;
-    protected $businessCodeDesc;
+    protected $code;
+    protected $message;
+    protected $data;
 
-    public function setBusinessCodeAndDesc($code = 0, $desc = '')
+    public function __construct(Request $request, $code = 0, $message = '', $data = '')
     {
-        $this->businessCode = (int)$code;
-        $this->businessCodeDesc = $desc;
+        parent::__construct($request);
+
+        $this->code = (int)$code;
+        $this->message = $message;
+        $this->data = $data;
+    }
+
+    public function setCode($code)
+    {
+        $this->code = (int)$code;
 
         return $this;
     }
 
-    public function setContent($content)
+    public function setMessage($message)
     {
-        return $this->setJsonContent($content);
-    }
+        $this->message = $message;
 
-    public function setJsonContent($content)
-    {
-        $this->setContentType('application/json');
-        $this->content = $content;
         return $this;
     }
 
-    protected function getJsonBody()
+    public function setData($data)
     {
-        return json_encode([
-            'businessCode' => $this->businessCode,
-            'businessCodeDesc' => $this->businessCodeDesc,
-            'data' => $this->content,
-            'timestamp' => time(),
-        ]);
+        $this->data = $data;
+
+        return $this;
+    }
+
+    protected function getBody()
+    {
+        return [
+            'code' => $this->code,
+            'message' => $this->message,
+            'data' => $this->data,
+            'timestamp' => getNowTimestampMs(),
+        ];
     }
 
     protected function _sendContent()
     {
-        $this->content = $this->getJsonBody();
+        $this->setJsonContent($this->getBody());
         parent::_sendContent();
     }
 }

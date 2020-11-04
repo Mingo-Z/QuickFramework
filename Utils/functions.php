@@ -505,6 +505,20 @@ function isDebug()
     return envIniConfig('appIsDebug', 'global', true);
 }
 
+/**
+ * Create \Qf\Kernel\Http\JsonResponse object
+ *
+ * eg: responseJson(['code' => 0, 'message' => 'success', 'data' => 'data'])
+ *
+ * @param array $arguments
+ * @return \Qf\Kernel\Http\JsonResponse
+ * @throws \Qf\Kernel\Exception
+ */
+function responseJson($arguments)
+{
+    return new \Qf\Kernel\Http\JsonResponse(Application::getApp()->request, ...$arguments);
+}
+
 
 
 

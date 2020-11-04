@@ -34,8 +34,7 @@ abstract class ApiRequestDispatchAuthMiddleware extends Middleware
             $authKeyName = envIniConfig('authKeyName', 'http:auth');
             $serverAuthCode = $app->request->urlHashCode($appKey, [$authKeyName]);
             if ($app->request->isRequestJson()) {
-                $requestArray = json_decode($app->request->getRawBody(), true);
-                $clientAuthCode = $requestArray[$authKeyName] ?? '';
+                $clientAuthCode = $app->request->getOrigNoNormalValue($authKeyName);
             } else {
                 $clientAuthCode = $app->request->$authKeyName;
             }
@@ -47,6 +46,8 @@ abstract class ApiRequestDispatchAuthMiddleware extends Middleware
                     $app->response->setJsonContent([
                         'code' => $code,
                         'message' => $message,
+                        'data' => '',
+                        'timestamp' => getNowTimestampMs(),
                     ]);
                 } else {
                     $app->response->setContent("Forbidden($code)");
