@@ -44,9 +44,9 @@ abstract class ApiRequestDispatchAuthMiddleware extends Middleware
                 $app->response->setCode($code);
                 if ($app->request->isNeedJson()) {
                     $app->response->setJsonContent([
-                        'code' => $code,
-                        'message' => $message,
-                        'data' => '',
+                        'businessCode' => $code,
+                        'businessMessage' => $message,
+                        'businessData' => '',
                         'timestamp' => getNowTimestampMs(),
                     ]);
                 } else {

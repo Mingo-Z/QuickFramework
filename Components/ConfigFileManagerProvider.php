@@ -44,7 +44,7 @@ class ConfigEntryProvider extends Provider
 
     public function __get($key)
     {
-        return isset($this->entries[$key]) ? $this->entries[$key] : '';
+        return $this->entries[$key] ?? null;
     }
 }
 
