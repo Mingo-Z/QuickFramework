@@ -1,2 +1,3 @@
 # QuickFramework
-PHP fast development framework!
+- PHP fast development framework!
+- Require PHP version 7.0+
