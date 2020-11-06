@@ -99,6 +99,13 @@ class Response
     protected $content;
 
     /**
+     * 响应内容是否json编码
+     *
+     * @var bool
+     */
+    protected $isEncodeContentJson = false;
+
+    /**
      * 响应头部
      *
      * @var array
@@ -106,7 +113,7 @@ class Response
     protected $_headers = array();
 
     /**
-     * @var SugarHttpRequest
+     * @var Request
      */
     protected $request;
 
@@ -197,31 +204,30 @@ class Response
     }
 
     /**
-     * 设置响应的内容
+     * 设置响应内容
      *
-     * @param string $content
+     * @param mixed $content
      * @return $this
      */
     public function setContent($content)
     {
-        if (is_scalar($content)) {
-            $this->content = (string)$content;
-        }
+        $this->content = $content;
+
         return $this;
     }
 
     /**
      * 设置json格式响应内容不能与setContent、toJson同时使用
      *
-     * @param mixed $var 除resource类型
+     * @param mixed $var 响应内容
      * @return $this
      */
     public function setJsonContent($var)
     {
-        if (!is_resource($var)) {
-            $this->content = json_encode($var);
-            $this->setContentType('application/json');
-        }
+        $this->setContent($var);
+        $this->isEncodeContentJson = true;
+        $this->setContentType('application/json');
+
         return $this;
     }
 
@@ -290,7 +296,7 @@ class Response
 
     protected function _sendContent()
     {
-        echo $this->content;
+        echo $this->isEncodeContentJson ? json_encode($this->content) : $this->content;
         if (function_exists('fastcgi_finish_request')) {
             fastcgi_finish_request();
         }
@@ -310,7 +316,7 @@ class Response
             // 清空未通过Response返回，直接输出到缓存冲区的内容
             ob_clean();
             // 针对请求要求JSON内容响应的自动处理
-            if ($this->request->isNeedJson() && strcasecmp($this->contentType, 'application/json')) {
+            if ($this->request->isNeedJson() && !$this->isEncodeContentJson) {
                 $this->setJsonContent($this->content);
             }
             $this->_sendHeaders();
