@@ -90,6 +90,9 @@ class Request
 
     public function init()
     {
+        $this->filteredServerVar = $this->filterArrayVar($_SERVER);
+        $this->requestHeaders = $this->parseRequestAllHeadersByServer();
+
         if (!$this->isCli()) {
             $this->origGpcssVarArray = [
                 self::HTTP_REQUEST_VAR_GET => $_GET,
@@ -113,8 +116,6 @@ class Request
             ];
             $this->filteredArgv = $this->filterArrayVar($_SERVER['argv']);
         }
-        $this->filteredServerVar = $this->filterArrayVar($_SERVER);
-        $this->requestHeaders = $this->parseRequestAllHeadersByServer();
 
         return $this;
     }
