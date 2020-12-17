@@ -123,7 +123,7 @@ class ConfigFileManagerProvider extends Provider
             $array = $this->configCoreArray[$name];
             $configFilePath = isset($array['configFilePath']) ? $array['configFilePath'] : '';
             $type = isset($array['type']) ? (int)$array['type'] : 0;
-            $entries = null;
+            $entries = [];
             switch ($type) {
                 case self::CONFIG_FILE_TYPE_PHP_ARRAY:
                     $entries = $this->parsePhpArrayConfigFile($configFilePath);
@@ -133,18 +133,16 @@ class ConfigFileManagerProvider extends Provider
                     break;
                 default:
             }
-            if ($entries) {
-                $object = new ConfigEntryProvider();
-                $object->init($entries);
-                $this->objects[$name] = $object;
-            }
+            $object = new ConfigEntryProvider();
+            $object->init($entries);
+            $this->objects[$name] = $object;
         }
         return isset($this->objects[$name]) ? $this->objects[$name] : null;
     }
 
     protected function parseJsonConfigFile($file)
     {
-        $entries = null;
+        $entries = [];
         if (is_readable($file) && ($fileContent = FileHelper::readLocalFileN($file))) {
             $entries = json_decode($fileContent, true);
         }
@@ -160,7 +158,7 @@ class ConfigFileManagerProvider extends Provider
      */
     protected function parsePhpArrayConfigFile($configFilePath)
     {
-        $entries = null;
+        $entries = [];
         if (is_readable($configFilePath)) {
             $ret = require $configFilePath; // return array();
             if ($ret && is_array($ret)) {
