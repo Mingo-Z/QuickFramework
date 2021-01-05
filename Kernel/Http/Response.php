@@ -337,6 +337,21 @@ class Response
     }
 
     /**
+     * HTTP OPTIONS请求处理
+     */
+    public function options()
+    {
+        if ($this->request->isRequestMethod('OPTIONS')) {
+            if (($corsAllowDomains = envIniConfig('corsAllowDomains', 'http'))) {
+                $corsAccessMaxAge = envIniConfig('corsAccessMaxAge', 'http', 86400);
+                $this->setAllowCrossDomains(explode(',', $corsAllowDomains), null, null, $corsAccessMaxAge);
+            }
+            // 返回空内容中断不执行后面的逻辑
+            $this->setProcessed(true)->send()->stop();
+        }
+    }
+
+    /**
      * 获取PHP缓存区已有的内容，并且清空
      *
      * @return string

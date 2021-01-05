@@ -125,16 +125,7 @@ class Application
     {
         $this->request = (new Request())->init();
         $this->response = new Response($this->request);
-
-        // HTTP OPTIONS请求处理
-        if ($this->request->isRequestMethod('OPTIONS')) {
-            if (($corsAllowDomains = envIniConfig('corsAllowDomains', 'http'))) {
-                $corsAccessMaxAge = envIniConfig('corsAccessMaxAge', 'http', 86400);
-                $this->response->setAllowCrossDomains(explode(',', $corsAllowDomains), null, null, $corsAccessMaxAge);
-            }
-            // 返回空内容后中断执行后面的逻辑
-            $this->response->setProcessed(true)->send()->stop();
-        }
+        $this->response->options();
 
         $router = Router::getInstance();
         $this->dispatcher = $router->getDispatcher();
