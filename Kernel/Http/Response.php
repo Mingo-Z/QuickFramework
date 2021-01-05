@@ -145,7 +145,7 @@ class Response
      * 设置允许哪些域名跨域HTTP请求
      *
      * @param array|null $domains 允许请求的域名，默认不限制
-     * @param array|null $methods 允许请求的方式，GET、POST、OPTIONS、PUT、DELETE，默认不限制
+     * @param array|null $methods 允许请求的方式，GET、POST、OPTIONS、PUT、DELETE、HEAD等，默认不限制
      * @param array|null $headers 允许请求的头，默认不限制
      * @param int $maxAge 在该时间内不需要再次进行预请求检查
      * @return $this
