@@ -355,6 +355,16 @@ class Request
         return $code;
     }
 
+    /**
+     * 判断是够是cors跨域请求
+     *
+     * @return bool
+     */
+    public function isCors()
+    {
+        return $this->getRequestHeader('origin')
+            && $this->getRequestHeader('sec-fetch-mode') == 'cors';
+    }
 
     /**
      * 判断当前是否是以命令行模式运行

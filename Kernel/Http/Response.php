@@ -2,6 +2,7 @@
 namespace Qf\Kernel\Http;
 
 use Qf\Components\Facades\Cookie;
+use Qf\Components\Facades\Log;
 
 class Response
 {
@@ -342,7 +343,7 @@ class Response
     public function options()
     {
         if ($this->request->isRequestMethod('OPTIONS')) {
-            if (($corsAllowDomains = envIniConfig('corsAllowDomains', 'http'))) {
+            if ($this->request->isCors() && ($corsAllowDomains = envIniConfig('corsAllowDomains', 'http'))) {
                 $corsAccessMaxAge = envIniConfig('corsAccessMaxAge', 'http', 86400);
                 $this->setAllowCrossDomains(explode(',', $corsAllowDomains), null, null, $corsAccessMaxAge);
             }
