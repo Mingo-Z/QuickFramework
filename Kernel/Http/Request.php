@@ -363,7 +363,7 @@ class Request
     public function isCors()
     {
         return $this->getRequestHeader('origin')
-            && $this->getRequestHeader('sec-fetch-mode') == 'cors';
+            || $this->getRequestHeader('sec-fetch-mode') == 'cors';
     }
 
     /**

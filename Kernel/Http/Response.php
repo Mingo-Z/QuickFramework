@@ -143,7 +143,7 @@ class Response
         return $ret;
     }
     /**
-     * 设置允许哪些域名跨域HTTP请求
+     * 动态设置cors跨域请求配置
      *
      * @param array|null $domains 允许请求的域名，默认不限制
      * @param array|null $methods 允许请求的方式，GET、POST、OPTIONS、PUT、DELETE、HEAD等，默认不限制
@@ -158,9 +158,26 @@ class Response
         $headers = $headers ? join(', ', $headers) : '*';
         
         $this->setHeader('Access-Control-Allow-Origin', $domains);
-        $this->setHeader('Access-Control-Allow-Headers', $headers);
-        $this->setHeader('Access-Control-Allow-Methods', $methods);
-        $this->setHeader('Access-Control-Max-Age', (int)$maxAge);
+        if ($this->request->isRequestMethod('OPTIONS')) {
+            $this->setHeader('Access-Control-Allow-Headers', $headers);
+            $this->setHeader('Access-Control-Allow-Methods', $methods);
+            $this->setHeader('Access-Control-Max-Age', (int)$maxAge);
+        }
+
+        return $this;
+    }
+
+    /**
+     * 根据.env配置设置cors跨域请求头部
+     *
+     * @return $this
+     */
+    protected function setCorsHeaders()
+    {
+        if ($this->request->isCors() && ($corsAllowDomains = envIniConfig('corsAllowDomains', 'http'))) {
+            $corsAccessMaxAge = envIniConfig('corsAccessMaxAge', 'http', 86400);
+            $this->setAllowCrossDomains(explode(',', $corsAllowDomains), null, null, $corsAccessMaxAge);
+        }
 
         return $this;
     }
@@ -278,6 +295,7 @@ class Response
     protected function _sendHeaders()
     {
         if (!headers_sent()) {
+            $this->setCorsHeaders();
             header("HTTP/{$this->version} {$this->_statusCode} {$this->_statusText}", false, $this->_statusCode);
             $this->setHeader('Content-Type', $this->contentType . '; charset=' . $this->charset);
             foreach ($this->_headers as $key => $value) {
@@ -343,10 +361,6 @@ class Response
     public function options()
     {
         if ($this->request->isRequestMethod('OPTIONS')) {
-            if ($this->request->isCors() && ($corsAllowDomains = envIniConfig('corsAllowDomains', 'http'))) {
-                $corsAccessMaxAge = envIniConfig('corsAccessMaxAge', 'http', 86400);
-                $this->setAllowCrossDomains(explode(',', $corsAllowDomains), null, null, $corsAccessMaxAge);
-            }
             // 返回空内容中断不执行后面的逻辑
             $this->setProcessed(true)->send()->stop();
         }
