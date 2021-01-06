@@ -125,6 +125,8 @@ class Application
     {
         $this->request = (new Request())->init();
         $this->response = new Response($this->request);
+        $this->response->options();
+
         $router = Router::getInstance();
         $this->dispatcher = $router->getDispatcher();
         $this->dispatcher->dispatch()->execute();

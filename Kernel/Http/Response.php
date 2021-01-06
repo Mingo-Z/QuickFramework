@@ -151,13 +151,23 @@ class Response
     /**
      * 设置允许哪些域名跨域HTTP请求
      *
-     * @param array $domains 域名列表
+     * @param array|null $domains 允许请求的域名，默认不限制
+     * @param array|null $methods 允许请求的方式，GET、POST、OPTIONS、PUT、DELETE、HEAD等，默认不限制
+     * @param array|null $headers 允许请求的头，默认不限制
+     * @param int $maxAge 在该时间内不需要再次进行预请求检查
      * @return $this
      */
-    public function setAllowCrossDomains(array $domains = array())
+    public function setAllowCrossDomains(array $domains = null, array $methods = null, array $headers = null, $maxAge = 86400)
     {
-        $origin = $domains ? join(', ', $domains) : '*';
-        $this->setHeader('Access-Control-Allow-Origin', $origin);
+        $domains = $domains ? join(', ', $domains) : '*';
+        $methods = $methods ? join(', ', $methods) : '*';
+        $headers = $headers ? join(', ', $headers) : '*';
+        
+        $this->setHeader('Access-Control-Allow-Origin', $domains);
+        $this->setHeader('Access-Control-Allow-Headers', $headers);
+        $this->setHeader('Access-Control-Allow-Methods', $methods);
+        $this->setHeader('Access-Control-Max-Age', (int)$maxAge);
+
         return $this;
     }
 
@@ -330,6 +340,21 @@ class Response
     public function isProcessed()
     {
         return $this->_processed;
+    }
+
+    /**
+     * HTTP OPTIONS请求处理
+     */
+    public function options()
+    {
+        if ($this->request->isRequestMethod('OPTIONS')) {
+            if (($corsAllowDomains = envIniConfig('corsAllowDomains', 'http'))) {
+                $corsAccessMaxAge = envIniConfig('corsAccessMaxAge', 'http', 86400);
+                $this->setAllowCrossDomains(explode(',', $corsAllowDomains), null, null, $corsAccessMaxAge);
+            }
+            // 返回空内容中断不执行后面的逻辑
+            $this->setProcessed(true)->send()->stop();
+        }
     }
 
     /**
