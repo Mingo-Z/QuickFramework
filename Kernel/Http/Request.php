@@ -210,11 +210,13 @@ class Request
             // 严格类型比较，防止自动类型转换
             if (!in_array($key, $phpGlobalVarNames, true)) {
                 $filteredKey = str_replace($searchKws, $replaceKws, $key);
+                $filteredValue = $value;
                 if (is_array($value)) {
-                    $filteredArray[$filteredKey] = $this->filterArrayVar($value);
+                    $filteredValue = $this->filterArrayVar($value);
                 } elseif (is_string($value)) {
-                    $filteredArray[$filteredKey] = str_replace($searchKws, $replaceKws, $value);
+                    $filteredValue = str_replace($searchKws, $replaceKws, $value);
                 }
+                $filteredArray[$filteredKey] = $filteredValue;
             } else {
                 // 防止PHP保留变量被污染，在传入的原始数组中删除
                 unset($fields[$key]);
