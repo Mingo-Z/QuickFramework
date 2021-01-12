@@ -2,7 +2,6 @@
 namespace Qf\Kernel\Http;
 
 use Qf\Components\Facades\Cookie;
-use Qf\Components\Facades\Log;
 
 class Response
 {

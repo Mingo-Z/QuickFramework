@@ -367,7 +367,7 @@ function parseConds(array $rule)
         'ge' => "%s >= '%d'",
         'le' => "%s <= '%d'",
         'gt' => "%s > '%d'",
-        'lt' => "%s < '%d",
+        'lt' => "%s < '%d'",
         'eq' => "%s = '%s'",
         'neq' => "%s != '%s'",
         'in' => "%s IN ('%s')",
