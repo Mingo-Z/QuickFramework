@@ -72,16 +72,15 @@ class MysqlDistributedProvider extends Provider
             $port = isset($port) ? (int)$port : 3306;
             $charset = isset($charset) ? $charset : 'utf8';
             $connectTimeout = isset($timeout) ? (int)$timeout : $this->connectTimeout;
-            $connection = mysqli_init();
-            $connection->options(MYSQLI_OPT_CONNECT_TIMEOUT, $connectTimeout);
-            if ($connection->real_connect($host, $username, $password, $dbname, $port)) {
-                $connection->set_charset($charset);
-                $this->activedConnections[$this->connectionId] = $connection;
-                $this->connection = $connection;
+            $this->connection = mysqli_init();
+            $this->connection->options(MYSQLI_OPT_CONNECT_TIMEOUT, $connectTimeout);
+            if ($this->connection->real_connect($host, $username, $password, $dbname, $port)) {
+                $this->connection->set_charset($charset);
+                $this->activedConnections[$this->connectionId] = $this->connection;
                 $this->isConnected = true;
             } else {
-                $connection = null;
                 $this->error();
+                $this->connection = null;
             }
         }
     }
