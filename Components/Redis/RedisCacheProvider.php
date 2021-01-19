@@ -214,4 +214,22 @@ class RedisCacheProvider extends Provider
 
         return $values;
     }
+
+    /**
+     * redis环境执行lua脚本
+     *
+     * @param string $code lua code
+     * @param int $keysNum key参数的数量
+     * @param mixed ...$arguments
+     * @return mixed
+     */
+    public function evalLuaCode($code, $keysNum, ...$arguments)
+    {
+        $retValue = null;
+        if ($this->isConnected()) {
+            $retValue = $this->connection->eval($code, $arguments, $keysNum);
+        }
+
+        return $retValue;
+    }
 }

@@ -13,6 +13,7 @@ namespace Qf\Components\Facades;
  * @method static bool setHashTable($key, $field, $value)
  * @method static bool delHashTable($key, $field)
  * @method static string getHashTable($key, $field)
+ * @method static mixed evalLuaCode($code, $keysNum, ...$arguments)
  */
 class Cache extends Facade
 {
