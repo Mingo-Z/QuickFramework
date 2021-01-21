@@ -50,9 +50,9 @@ CODE;
     public $bucketTokens;
 
     /**
-     * 产生令牌的速率，n/s
+     * 产生令牌的速率，n/ms
      *
-     * @var int
+     * @var double
      */
     public $newTokenRate;
 
