@@ -2,6 +2,7 @@
 namespace Qf\Components\RateLimit;
 
 use Qf\Components\Facades\Cache;
+use Qf\Components\Facades\Log;
 
 class TokenBucketRateLimit extends RateLimit
 {
@@ -18,16 +19,15 @@ class TokenBucketRateLimit extends RateLimit
     local origValue = redis.call('hget', 'tokenBucketPool', bucketName) -- bucketName桶状态json字符串
     if origValue then
         jsonValue = cjson.decode(origValue)
-        local remainedTokens = jsonValue.tokens
+        local deltaNs = math.max(0, requestTime - jsonValue.lastRequestedTime)
+        jsonValue.lastRequestedTime = requestTime -- 更新最近请求时间
+        local newTokens = math.floor(deltaNs * bucketNewTokenRate) -- 增加的令牌数
+        local remainedTokens = jsonValue.tokens + newTokens
         if remainedTokens >= requestTokens then
             remainedTokens = remainedTokens - requestTokens
             isAllow = 1
         end
-        local deltaNs = math.max(0, requestTime - jsonValue.lastRequestedTime)
-        jsonValue.lastRequestedTime = requestTime -- 更新最近请求时间
-        local newTokens = math.floor(deltaNs * bucketNewTokenRate) -- 增加的令牌数
-        local finalTokens = math.min(bucketCap, remainedTokens + newTokens) -- 桶可用的令牌数量
-        jsonValue.tokens = finalTokens
+        jsonValue.tokens = math.min(bucketCap, remainedTokens) -- 桶可用的令牌数量
     else
         jsonValue = {lastRequestedTime = requestTime, tokens = bucketCap}
     end
