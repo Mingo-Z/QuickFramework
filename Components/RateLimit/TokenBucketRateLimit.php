@@ -2,7 +2,6 @@
 namespace Qf\Components\RateLimit;
 
 use Qf\Components\Facades\Cache;
-use Qf\Components\Facades\Log;
 
 class TokenBucketRateLimit extends RateLimit
 {
@@ -58,21 +57,32 @@ CODE;
     public $newTokenRate;
 
     /**
-     * @param string $requestId 请求标识
+     * @param string|null $requestId 请求标识
      * @return bool
      */
-    public function isAllow($requestId)
+    public function isAllow($requestId = null)
     {
         $isAllow = true;
 
         $result =Cache::evalLuaCode(self::REDIS_LUA_GET_TOKENS_SCRIPT, 1,
-        $requestId, $this->newTokenRate, $this->bucketCap, getNowTimestampMs(), 1);
+        $this->getRequestId($requestId), $this->newTokenRate, $this->bucketCap, getNowTimestampMs(), 1);
 
         if (is_array($result) && isset($result[0])) {
             $isAllow = ($result[0] === 1);
         }
 
         return $isAllow;
+    }
+
+    /**
+     * 重置限流桶状态
+     *
+     * @param string|null $requestId
+     * @return bool
+     */
+    public function resetBucketCount($requestId = null)
+    {
+        return Cache::delHashTable('tokenBucketPool', $this->getRequestId($requestId)); //todo hard code hashtable key
     }
 
 }
