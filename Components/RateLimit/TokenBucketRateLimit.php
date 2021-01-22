@@ -13,24 +13,25 @@ class TokenBucketRateLimit extends RateLimit
     local requestTime = tonumber(ARGV[3]) -- 请求时间，单位：微秒
     local requestTokens = tonumber(ARGV[4]) -- 请求的令牌数
     local isAllow = 0 -- 是否允许
+    local jsonValue = {}
     
     local origValue = redis.call('hget', 'tokenBucketPool', bucketName) -- bucketName桶状态json字符串
     if origValue then
-        local jsonValue = cjson.decode(origValue)
+        jsonValue = cjson.decode(origValue)
         local remainedTokens = jsonValue.tokens
         if remainedTokens >= requestTokens then
             remainedTokens = remainedTokens - requestTokens
             isAllow = 1
-         end
-        local deltaNs = math.min(0, requestTime - jsonValue.lastRequestedTime)
+        end
+        local deltaNs = math.max(0, requestTime - jsonValue.lastRequestedTime)
         jsonValue.lastRequestedTime = requestTime -- 更新最近请求时间
         local newTokens = math.floor(deltaNs * bucketNewTokenRate) -- 增加的令牌数
         local finalTokens = math.min(bucketCap, remainedTokens + newTokens) -- 桶可用的令牌数量
         jsonValue.tokens = finalTokens
     else
-        local jsonValue = {lastRequestedTime = requestTime, tokens = 0}
-        redis.call('hset', 'tokenBucketPool', bucketName, cjson.encode(jsonValue)
+        jsonValue = {lastRequestedTime = requestTime, tokens = bucketCap}
     end
+    redis.call('hset', 'tokenBucketPool', bucketName, cjson.encode(jsonValue))
     
     return {isAllow, jsonValue.tokens}
 CODE;
