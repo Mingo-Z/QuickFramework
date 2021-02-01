@@ -68,4 +68,20 @@ trait RedisComTrait {
 
         return $ret;
     }
+
+    /**
+     * 返回最近一次错误信息并且清除
+     *
+     * @return string|null
+     */
+    public function getError()
+    {
+        $error = null;
+        if ($this->connection) {
+            $error = $this->connection->getLastError();
+            $this->connection->clearLastError();
+        }
+
+        return $error;
+    }
 }
