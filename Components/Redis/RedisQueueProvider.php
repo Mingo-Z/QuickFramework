@@ -102,8 +102,11 @@ class RedisQueueProvider extends Provider
         $ret = '';
 
         if ($this->isConnected()) {
-            $ret = $this->decode($this->connection->lPop($this->realKey()));
+            $response = $this->connection->lPop($this->realKey());
             $this->checkError();
+            if ($response) {
+                $ret = $this->decode($response);
+            }
         }
 
         return $ret;
@@ -145,8 +148,11 @@ class RedisQueueProvider extends Provider
     {
         $ret = '';
         if ($this->isConnected()) {
-            $ret = $this->decode($this->connection->rPop($this->realKey()));
+            $response = $this->connection->rPop($this->realKey());
             $this->checkError();
+            if ($response) {
+                $ret = $this->decode($response);
+            }
         }
 
         return $ret;

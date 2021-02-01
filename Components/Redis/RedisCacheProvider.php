@@ -148,8 +148,11 @@ class RedisCacheProvider extends Provider
         $ret = '';
 
         if ($this->isConnected()) {
-            $ret = $this->decode($this->connection->get($this->realKey($key)));
+            $response = $this->connection->get($this->realKey($key));
             $this->checkError();
+            if ($response) {
+                $ret = $this->decode($response);
+            }
         }
 
         return $ret;
