@@ -37,6 +37,7 @@ class RedisLockProvider extends Provider
                 $exTimestamp = time() + $expire;
                 $lockName = $this->realKey($name);
                 $res = $this->connection->set($lockName, $exTimestamp, array('nx', 'ex' => $expire));
+                $this->checkError();
                 // 提升效率,暂时不考虑未设置过期时间的问题
 /*                if (!($res = $this->driver->set($lockName, $exTimestamp, array('nx', 'ex' => $expire)))) {
                     $ttl = $this->driver->ttl($lockName);
@@ -61,6 +62,7 @@ class RedisLockProvider extends Provider
 
         if ($this->isConnected()) {
             $res = $this->connection->exists($this->realKey($name));
+            $this->checkError();
         }
         return $res;
     }
@@ -76,6 +78,7 @@ class RedisLockProvider extends Provider
         $res = false;
         if ($this->isLocking($name)) {
             $res = $this->connection->del($this->realKey($name));
+            $this->checkError();
         }
         return $res;
     }

@@ -64,6 +64,7 @@ trait RedisComTrait {
         $ret = false;
         if ($this->isConnected(false)) {
             $ret = $this->connection->ping();
+            $this->checkError();
         }
 
         return $ret;
@@ -83,5 +84,15 @@ trait RedisComTrait {
         }
 
         return $error;
+    }
+
+    /**
+     * 检查抛出错误
+     */
+    protected function checkError()
+    {
+        if (($error = $this->getError())) {
+            throw new Exception($error);
+        }
     }
 }
