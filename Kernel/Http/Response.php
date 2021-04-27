@@ -341,8 +341,10 @@ class Response
     public function send()
     {
         if ($this->isProcessed()) {
-            // 清空未通过Response返回，直接输出到缓存冲区的内容
-            ob_clean();
+            // 清除未通过return，直接输出到缓存冲区的内容
+            if (ob_get_level()) {
+                ob_clean();
+            }
             // 针对请求要求JSON内容响应的自动处理
             if ($this->request->isNeedJson() && !$this->isEncodeContentJson) {
                 $this->setJsonContent($this->content);
