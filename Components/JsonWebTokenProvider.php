@@ -150,7 +150,7 @@ class JsonWebTokenProvider extends Provider
         $exp = $payloadArray['exp'] ?? 0;
         $nbf = $payloadArray['nbf'] ?? 0;
 
-        if ($nbf < $nowTimestampMs || $iat > $nowTimestampMs) {
+        if ($nbf > $nowTimestampMs || $iat > $nowTimestampMs) {
             throw new Exception(self::JWT_ERR_TOKEN_IS_NOT_VALID);
         } elseif ($exp <= $nowTimestampMs) {
             throw new Exception(self::JWT_ERR_TOKEN_HAS_EXPIRED);
