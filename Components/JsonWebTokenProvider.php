@@ -109,7 +109,7 @@ class JsonWebTokenProvider extends Provider
     protected function sign($data, $algName = 'HS256')
     {
         $algConfig = $signature = null;
-        if (!$algName || ($algConfig = self::$algTable[$algName]) ?? null) {
+        if (!$algName || !($algConfig = self::$algTable[$algName]) ?? null) {
             throw new Exception(self::JWT_ERR_NOT_SUPPORT_ALG);
         }
         $algFunc = $algConfig['func'];
