@@ -196,7 +196,7 @@ class OtherHelper
                 $num = floor($num / 54) - 1;
                 $ret = $codes[$index] . $ret;
             }
-            $ret = $codes[$num] . $ret;
+            $ret = $codes[(int)$num] . $ret;
         }
 
         return $ret;
