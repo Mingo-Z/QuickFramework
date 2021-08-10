@@ -52,10 +52,12 @@ class HttpClient
      * @param int $timeout
      * @param null|string $proxy   protocol://username:password@host:port, http://test:123@127.0.0.1:8080
      * socks5://test:123@127.0.0.1:8080
-     * @return bool|string
+     * @param bool $isReturnResponseHeader if true, return [responseBody, responseHeader]
+     * @return bool|string|array
      */
     public static function request($url, $method = HttpClient::REQUEST_METHOD_POST,
-                                   $params = null, array $headers = null, $timeout = 30, $proxy = null)
+                                   $params = null, array $headers = null, $timeout = 30,
+                                   $proxy = null, $isReturnResponseHeader = false)
     {
         $curlHandle = curl_init($url);
         curl_setopt($curlHandle, CURLOPT_TIMEOUT, (int)$timeout);
@@ -96,6 +98,13 @@ class HttpClient
                 }
             }
         }
+        $responseHeader = null;
+        if ($isReturnResponseHeader) {
+            curl_setopt($curlHandle, CURLOPT_HEADERFUNCTION, function($ch, $header) use (&$responseHeader) {
+                $responseHeader .= $header;
+                return strlen($header);
+            });
+        }
 
         $responseBody = curl_exec($curlHandle);
         if (($errno = curl_errno($curlHandle))) {
@@ -103,7 +112,7 @@ class HttpClient
         }
         curl_close($curlHandle);
 
-        return $responseBody;
+        return ($isReturnResponseHeader && $responseBody) ? [$responseBody, $responseHeader] : $responseBody;
     }
 
 }
