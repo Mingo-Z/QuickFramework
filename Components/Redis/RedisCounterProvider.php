@@ -35,6 +35,7 @@ class RedisCounterProvider extends Provider
 
         if ($this->isConnected()) {
             $ret = $this->connection->incrBy($this->realKey(), (int)$increment);
+            $this->checkError();
         }
 
         return $ret;
@@ -53,6 +54,7 @@ class RedisCounterProvider extends Provider
 
         if ($this->isConnected()) {
             $ret = $this->connection->decrBy($this->realKey(), (int)$decrement);
+            $this->checkError();
         }
 
         return $ret;

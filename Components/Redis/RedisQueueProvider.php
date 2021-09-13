@@ -33,6 +33,7 @@ class RedisQueueProvider extends Provider
 
         if ($this->isConnected()) {
             $ret = $this->connection->lLen($this->realKey());
+            $this->checkError();
         }
         return $ret;
     }
@@ -49,6 +50,7 @@ class RedisQueueProvider extends Provider
 
         if ($this->isConnected()) {
             $ret = $this->connection->rpoplpush($this->realKey(), $this->encode($elem));
+            $this->checkError();
         }
 
         return $ret;
@@ -66,6 +68,7 @@ class RedisQueueProvider extends Provider
 
         if ($this->isConnected()) {
             $ret = $this->connection->lPush($this->realKey(), $this->encode($elem));
+            $this->checkError();
         }
 
         return $ret;
@@ -83,6 +86,7 @@ class RedisQueueProvider extends Provider
 
         if ($this->isConnected()) {
             $ret = $this->connection->rPush($this->realKey(), $this->encode($elem));
+            $this->checkError();
         }
 
         return $ret;
@@ -98,7 +102,11 @@ class RedisQueueProvider extends Provider
         $ret = '';
 
         if ($this->isConnected()) {
-            $ret = $this->decode($this->connection->lPop($this->realKey()));
+            $response = $this->connection->lPop($this->realKey());
+            $this->checkError();
+            if ($response) {
+                $ret = $this->decode($response);
+            }
         }
 
         return $ret;
@@ -122,6 +130,7 @@ class RedisQueueProvider extends Provider
             $this->connection->setOption(\Redis::OPT_READ_TIMEOUT, $readTimeout); // 设置网络读取不超时,超时将会导致不会一直阻塞
             // 返回一维索引数组,0为所属队列名称,1为弹出的元素
             $response = $this->connection->blPop($this->realKey(), $timeout);
+            $this->checkError();
             if ($response) {
                 $ret = $this->decode($response[1]);
             }
@@ -139,7 +148,11 @@ class RedisQueueProvider extends Provider
     {
         $ret = '';
         if ($this->isConnected()) {
-            $ret = $this->decode($this->connection->rPop($this->realKey()));
+            $response = $this->connection->rPop($this->realKey());
+            $this->checkError();
+            if ($response) {
+                $ret = $this->decode($response);
+            }
         }
 
         return $ret;
@@ -163,6 +176,7 @@ class RedisQueueProvider extends Provider
             $this->connection->setOption(\Redis::OPT_READ_TIMEOUT, $readTimeout); // 设置网络读取不超时,超时将会导致不会一直阻塞
             // 返回一维索引数组,0为所属队列名称,1为弹出的元素
             $response = $this->connection->brPop($this->realKey(), $timeout);
+            $this->checkError();
             if ($response) {
                 $ret = $this->decode($response[1]);
             }

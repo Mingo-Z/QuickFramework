@@ -64,6 +64,7 @@ trait RedisComTrait {
         $ret = false;
         if ($this->isConnected(false)) {
             $ret = $this->connection->ping();
+            $this->checkError();
         }
 
         return $ret;
@@ -86,6 +87,16 @@ trait RedisComTrait {
     }
 
     /**
+     * 检查抛出错误
+     */
+    protected function checkError()
+    {
+        if (($error = $this->getError())) {
+            throw new Exception($error);
+        }
+    }
+
+    /**
      * 用于动态设置键名
      *
      * @param string $name 键名
@@ -98,3 +109,4 @@ trait RedisComTrait {
         return $this;
     }
 }
+

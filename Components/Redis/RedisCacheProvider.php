@@ -33,6 +33,7 @@ class RedisCacheProvider extends Provider
 
     	if ($this->isConnected()) {
     		$ret = $this->connection->hSet($this->realKey($key), $field, $this->encode($value) );
+    		$this->checkError();
     	}
 
     	return $ret;
@@ -47,6 +48,7 @@ class RedisCacheProvider extends Provider
                 return $this->realKey($elem);
             }, $channels);
             $ret = $this->connection->subscribe($channels, $callback);
+            $this->checkError();
         }
 
         return $ret;
@@ -58,6 +60,7 @@ class RedisCacheProvider extends Provider
 
         if ($this->isConnected()) {
             $ret = $this->connection->unsubscribe($this->realKey($channel));
+            $this->checkError();
         }
 
         return $ret;
@@ -69,6 +72,7 @@ class RedisCacheProvider extends Provider
 
         if ($this->isConnected()) {
             $ret = $this->connection->publish($this->realKey($channel), $this->encode($message));
+            $this->checkError();
         }
 
         return $ret;
@@ -87,7 +91,8 @@ class RedisCacheProvider extends Provider
 
     	if ($this->isConnected()) {
     		$ret = $this->decode($this->connection->hGet($this->realKey($key), $field));
-    	}
+            $this->checkError();
+        }
 
     	return $ret;
     }
@@ -105,7 +110,8 @@ class RedisCacheProvider extends Provider
 
     	if ($this->isConnected()) {
     		$ret = $this->connection->hDel($this->realKey($key), $field);
-    	}
+            $this->checkError();
+        }
 
     	return $ret;
     }
@@ -125,6 +131,7 @@ class RedisCacheProvider extends Provider
         if ($this->isConnected()) {
             $expire = is_null($expire) ? $expire : (int)$expire;
             $ret = $this->connection->set($this->realKey($key), $this->encode($value), $expire);
+            $this->checkError();
         }
 
         return $ret;
@@ -141,7 +148,11 @@ class RedisCacheProvider extends Provider
         $ret = '';
 
         if ($this->isConnected()) {
-            $ret = $this->decode($this->connection->get($this->realKey($key)));
+            $response = $this->connection->get($this->realKey($key));
+            $this->checkError();
+            if ($response) {
+                $ret = $this->decode($response);
+            }
         }
 
         return $ret;
@@ -159,6 +170,7 @@ class RedisCacheProvider extends Provider
 
         if ($this->isConnected()) {
             $ret = $this->connection->delete($this->realKey($key));
+            $this->checkError();
         }
 
         return $ret;
@@ -182,6 +194,7 @@ class RedisCacheProvider extends Provider
                     $realArray[$this->realKey($key)] = $this->encode($value);
                 }
                 $ret = $this->connection->mset($realArray);
+                $this->checkError();
             }
         }
 
@@ -204,6 +217,7 @@ class RedisCacheProvider extends Provider
                     $realKeys[] = $this->realKey($key);
                 }
                 $values = $this->connection->mget($realKeys);
+                $this->checkError();
                 if ($values) {
                     foreach ($values as $index => $val) {
                         $values[$index] = $this->decode($val);
@@ -213,5 +227,24 @@ class RedisCacheProvider extends Provider
         }
 
         return $values;
+    }
+
+    /**
+     * redis环境执行lua脚本
+     *
+     * @param string $code lua code
+     * @param int $keysNum key参数的数量
+     * @param mixed ...$arguments
+     * @return mixed
+     */
+    public function evalLuaCode($code, $keysNum, ...$arguments)
+    {
+        $retValue = null;
+        if ($this->isConnected()) {
+            $retValue = $this->connection->eval($code, $arguments, $keysNum);
+            $this->checkError();
+        }
+
+        return $retValue;
     }
 }

@@ -44,6 +44,8 @@ class MiddlewareManager
     {
         $stack = null;
         $module = $module ?: 'default';
+        $gApp = Application::getApp();
+        $gApp->request->setData('requestStage', $stageName);
         $middlewareArray = self::getRegisteredMiddlewareArray($stageName, $module);
         if ($middlewareArray) {
             $stack = array_reduce(array_reverse($middlewareArray), function ($next, $current) {
@@ -60,6 +62,6 @@ class MiddlewareManager
             });
         }
 
-        return $stack ? $stack(Application::getApp()) : null;
+        return $stack ? $stack($gApp) : null;
     }
 }
