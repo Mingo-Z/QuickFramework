@@ -47,4 +47,58 @@ class FileHelper
         $n = $n ?? $fileObject->getSize();
         return $fileObject->fread((int)$n);
     }
+
+    /**
+     * 保存base64编码的文件
+     *
+     * @param string $data base64 content
+     * @param $saveFilePath 保存路径
+     * @return array|null
+     */
+    public static function saveBase64ToFile($data, $saveFilePath)
+    {
+        $file = null;
+        if ($data && $saveFilePath && ($content = base64_decode($data))) {
+            $saveDirPath = dirname($saveFilePath);
+            if (is_dir($saveDirPath) || mkdir($saveDirPath, 0755, true)) {
+                $size = self::writeContentToLocalFile($saveFilePath, $content, false);
+                if ($size > 0) {
+                    $file = [
+                        'path' => $saveFilePath,
+                        'size' => $size,
+                    ];
+                }
+            }
+        }
+
+        return $file;
+    }
+
+    /**
+     * 获取图片文件格式
+     *
+     * @param string $content 文件二进制数据
+     * @return string|null 扩展名
+     */
+    public static function getImageFileExtension($content)
+    {
+        $extension = null;
+        $mimeTypeHeaderCodes = [
+            'jpeg' => "\xff\xd8\xff\xe1",
+            'jpg' => "\xff\xd8\xff\xe1",
+            'png' => "\x89\x50\x4e\x47",
+            'tif' => "\x49\x49\x2a\x00",
+            'bmp' => "\x42\x4d\x88\xa7",
+        ];
+        if (strlen($content) >= 4) {
+            foreach ($mimeTypeHeaderCodes as $key => $code) {
+                if (strncmp($code, $content, strlen($code)) === 0) {
+                    $extension = $key;
+                    break;
+                }
+            }
+        }
+
+        return $extension;
+    }
 }
