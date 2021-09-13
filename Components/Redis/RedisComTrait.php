@@ -108,5 +108,25 @@ trait RedisComTrait {
 
         return $this;
     }
+
+    /**
+     * 删除指定key
+     *
+     * @param string｜null $cusName 值为null从当前对象获取
+     * @return false
+     * @throws Exception
+     */
+    public function deleteKey($cusName = null)
+    {
+        $ret = false;
+
+        $key = $this->realKey($cusName);
+        if ($key && $this->isConnected(false)) {
+            $ret = $this->connection->delete($key);
+            $this->checkError();
+        }
+
+        return $ret;
+    }
 }
 

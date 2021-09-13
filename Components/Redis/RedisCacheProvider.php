@@ -166,14 +166,7 @@ class RedisCacheProvider extends Provider
      */
     public function delete($key)
     {
-        $ret = false;
-
-        if ($this->isConnected()) {
-            $ret = $this->connection->delete($this->realKey($key));
-            $this->checkError();
-        }
-
-        return $ret;
+        return $this->deleteKey($key);
     }
     
     /**
