@@ -134,7 +134,7 @@ class HttpParamCodeProxyProvider extends Provider
             $this->params = array_merge($this->commonParams, $this->params);
         }
         if ($params) {
-            $this->params = array_merge($params, $this->params);
+            $this->params = array_merge($this->params, $params);
         }
         if ($this->enableParamCode) {
             $this->setParamCode();
@@ -144,14 +144,14 @@ class HttpParamCodeProxyProvider extends Provider
             $this->timeout = (int)$timeout;
         }
         $this->requestMethod = $method;
+        $urlEncodeParams = null;
         if ($this->isCanHttp()) {
             $url = $this->scheme . "://" . $this->host . ':' . $this->port . $this->path;
-            $params = $this->params;
+            $urlEncodeParams = http_build_query($this->params);
             if (!$this->isPost()) {
                 $url .= '?' . http_build_query($this->params);
-                $params = null;
             }
-            $responseBody = HttpClient::request($url, $method, $params, $this->getHttpHeaders(),
+            $responseBody = HttpClient::request($url, $method, $urlEncodeParams, $this->getHttpHeaders(),
                 $this->timeout, $this->httpProxy);
             if ($responseBody && $this->isAcceptJson) {
                 $responseBody = json_decode($responseBody, true);
