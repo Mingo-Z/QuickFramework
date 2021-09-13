@@ -84,4 +84,17 @@ trait RedisComTrait {
 
         return $error;
     }
+
+    /**
+     * 用于动态设置键名
+     *
+     * @param string $name 键名
+     * @return $this
+     */
+    public function setName($name)
+    {
+        $this->name = $name;
+
+        return $this;
+    }
 }
