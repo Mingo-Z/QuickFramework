@@ -74,7 +74,7 @@ class HttpClient
 
         if ($method == self::REQUEST_METHOD_POST) {
             curl_setopt($curlHandle, CURLOPT_POST, true);
-            curl_setopt($curlHandle, CURLOPT_POSTFIELDS, $params);
+            curl_setopt($curlHandle, CURLOPT_POSTFIELDS, $params); // If $params is an array, the Content-Type header will be set to multipart/form-data
         }
         if (!strncasecmp($url, 'https', 5)) {
             curl_setopt($curlHandle, CURLOPT_SSL_VERIFYPEER, false);
