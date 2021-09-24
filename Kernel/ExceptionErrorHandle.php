@@ -68,14 +68,7 @@ class ExceptionErrorHandle
     {
         $handleErrorLevel = E_ALL | E_STRICT;
         if (!$ignoreErrorReporting) {
-            $errorLevel = error_reporting();
-            if (!($errorLevel & E_NOTICE)) {
-                $handleErrorLevel &= ~E_NOTICE;
-            }
-            if (!($handleErrorLevel & E_DEPRECATED)) {
-                $handleErrorLevel &= ~E_DEPRECATED;
-
-            }
+            $handleErrorLevel = error_reporting();
         }
 
         set_error_handler(__CLASS__ . '::errorHandle', $handleErrorLevel);
