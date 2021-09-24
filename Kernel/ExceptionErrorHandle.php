@@ -50,7 +50,7 @@ class ExceptionErrorHandle
         foreach ($backtrace as $index =>  $entry) {
             $newBacktrace[$index] = "#$index ";
             if (isset($entry['file'])) {
-                $newBacktrace[$index] .= $entry['file'] . '(' . $entry['line'] . '): ';
+                $newBacktrace[$index] .= $entry['file'] . ' in line ' . $entry['line'] . ': ';
             }
             $newBacktrace[$index] .= (isset($entry['class']) ? $entry['class'] . '->' : '') . $entry['function'] . '()';
         }

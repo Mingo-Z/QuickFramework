@@ -68,7 +68,7 @@ class Application
             date_default_timezone_set($timezone);
         }
 
-        ExceptionErrorHandle::installHandle();
+        ExceptionErrorHandle::installHandle(isDebug());
     }
 
     protected static function registerMiddleware()
