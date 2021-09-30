@@ -113,7 +113,7 @@ trait RedisComTrait {
      * 删除指定key
      *
      * @param string｜null $cusName 值为null从当前对象获取
-     * @return false
+     * @return bool
      * @throws Exception
      */
     public function deleteKey($cusName = null)

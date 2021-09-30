@@ -15,7 +15,9 @@ abstract class Model
 
     protected $tablePrimaryKey = 'id';
 
-    protected $tableColumnsName = [];
+    protected $tableColumnsName;
+
+    protected $tableColumnsDef;
 
     protected $enableCache = false;
 
@@ -41,22 +43,23 @@ abstract class Model
     {
         $cacheTableDdlKey = "model:tableddl:" . $this->tableKey;
         if ($this->enableCache && !$refreshCache) {
-            $this->tableColumnsName = $this->getCache($cacheTableDdlKey, []);
+            $this->tableColumnsDef = $this->getCache($cacheTableDdlKey, []);
         }
-        if (!$this->tableColumnsName && $this->tableKey && $this->dbConnection) {
+        if (!$this->tableColumnsDef && $this->tableKey && $this->dbConnection) {
             $tableName = $this->dbConnection->getTable($this->tableKey);
             $sql = "SHOW COLUMNS FROM $tableName";
             foreach ($this->dbConnection->fetchAllAssoc($sql) as $row) {
-                $this->tableColumnsName[] = $row['Field'];
+                $this->tableColumnsDef[$row['Field']] = $row;
                 if (!$this->tablePrimaryKey && $row['Key'] == 'PRI') {
                     $this->tablePrimaryKey = $row['Field'];
                 }
             }
-            if ($this->enableCache && $this->tableColumnsName) {
-                $this->setCache($cacheTableDdlKey, $this->tableColumnsName);
+            if ($this->enableCache && $this->tableColumnsDef) {
+                $this->setCache($cacheTableDdlKey, $this->tableColumnsDef);
             }
         }
-        if ($this->tableColumnsName) {
+        if ($this->tableColumnsDef) {
+            $this->tableColumnsName = array_keys($this->tableColumnsDef);
             foreach ($this->tableColumnsName as $columnName) {
                 $this->{$columnName} = null;
             }
