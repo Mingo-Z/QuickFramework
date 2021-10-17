@@ -66,7 +66,9 @@ class Command
         if (!$this->name) {
             throw new Exception('Command name is not set');
         } elseif (!ctype_alpha($shortOptName)) {
-            throw new Exception('The short parameter name must have');
+            throw new Exception('The short parameter name must have, and can only be alphabetic characters');
+        } elseif ($optionalValue && !$defaultValue) {
+            throw new Exception('Optional parameters must have default value');
         }
 
         $this->optionDefs[$shortOptName] = [
