@@ -45,10 +45,11 @@ class Command
      *
      * @param string $shortOptName 参数短名称
      * @param string|null $longOptName 参数长名称
-     * @param bool false $requireValue 是否必须
-     * @param bool false $optionalValue 是否可选
+     * @param bool $required 是否必须
+     * @param bool $isHasValue 是否有值
+     * @param bool $isOptionalValue 值是否可选
      * @param string|null $valueDesc 参数值描述
-     * @param mixed $defaultValue 默认值
+     * @param mixed $defaultValue 默认值，参数值可选设置默认值
      * @param string|null $comment 描述
      * @return $this
      * @throws Exception
@@ -56,8 +57,9 @@ class Command
     public function action(
         $shortOptName,
         $longOptName = null,
-        $requireValue = false,
-        $optionalValue = false,
+        $required = false,
+        $isHasValue = false,
+        $isOptionalValue = false,
         $valueDesc = null,
         $defaultValue = null,
         $comment =null
@@ -67,14 +69,15 @@ class Command
             throw new Exception('Command name is not set');
         } elseif (!ctype_alpha($shortOptName)) {
             throw new Exception('The short parameter name must have, and can only be alphabetic characters');
-        } elseif ($optionalValue && !$defaultValue) {
-            throw new Exception('Optional parameters must have default value');
+        } elseif ($isHasValue && $isOptionalValue && !$defaultValue) {
+            throw new Exception('Optional parameter must have default value');
         }
 
         $this->optionDefs[$shortOptName] = [
             'longName' => $longOptName,
-            'requireValue' => (bool)$requireValue,
-            'optionalValue' => (bool)$optionalValue,
+            'required' => (bool)$required,
+            'isHasValue' => (bool)$isHasValue,
+            'isOptionalValue' => (bool)$isOptionalValue,
             'valueDesc' => $valueDesc,
             'defaultValue' => $defaultValue,
             'comment' => $comment,
@@ -91,28 +94,50 @@ class Command
      * 获取指定参值
      *
      * @param string $name 参数名
-     * @param bool false $isLongName 是否是长名称
+     * @param bool $isLongName 是否是长名称
      * @return mixed|null
      */
-    public function option($name, $isLongName = false)
+    public function optionValue($name, $isLongName = false)
     {
         $value = null;
 
         $shortName = $isLongName ? ($this->longShortOptionNameMap[$isLongName] ?? '') : $name;
-        if (isset($this->optionDefs[$shortName])) {
-            $value = $this->parsedOptionResults[$shortName] ?? ($this->optionDefs[$shortName]['defaultValue']);
+        if (isset($this->parsedOptionResults[$name])) {
+            if ($this->parsedOptionResults[$shortName]) {
+                $value = $this->parsedOptionResults[$shortName];
+            } elseif ($this->optionDefs[$shortName]['isOptionalValue']) {
+                $value = $this->optionDefs[$shortName]['defaultValue'];
+            }
         }
 
         return $value;
     }
 
-    protected function checkOptions()
+    /**
+     * 获取所有传入参数
+     *
+     * @return array
+     */
+    public function options()
+    {
+        $options = [];
+        foreach ($this->optionDefs as $key => $optionDef) {
+            if (($value = $this->optionValue($key))) {
+                $options[$key] = $value;
+            }
+        }
+
+        return $options;
+    }
+
+    protected function check()
     {
         $errOptions = [];
-        foreach ($this->optionDefs as $key => $option) {
-            $value = $this->option($key);
-            if (($option['requireValue']  || $option['optionalValue']) && !$value) {
-                $errOptions[$key] = $option;
+        foreach ($this->optionDefs as $key => $optionDef) {
+            if ($optionDef['required'] && !isset($this->parsedOptionResults[$key])) {
+                $errOptions[$key] = $optionDef;
+            } elseif ($optionDef['isHasValue'] && !$this->optionValue($key)) {
+                $errOptions[$key] = $optionDef;
             }
         }
 
@@ -141,22 +166,26 @@ class Command
                     break;
                 case !strncmp($arg, '-', 1):
                     $arg = ltrim($arg, '-');
-                    $shortOptionName = $this->optionDefs[$arg] ? $arg : null;
+                    $shortOptionName = isset($this->optionDefs[$arg]) ? $arg : null;
                     break;
             }
             if ($shortOptionName) {
                 $option = $this->optionDefs[$shortOptionName];
-                if ($option['requireValue'] || $option['optionalValue']) {
+                if ($option['isHasValue']) {
                     $nextArg = $_SERVER['argv'][$index + 1] ?? '';
                     if (strpos($nextArg, '-') === false) {
                         $this->parsedOptionResults[$shortOptionName] = $nextArg;
                         $index++;
+                    } else {
+                        $this->parsedOptionResults[$shortOptionName] = null;
                     }
+                } else {
+                    $this->parsedOptionResults[$shortOptionName] = true;
                 }
             }
         }
 
-        if ($this->checkOptions()) {
+        if ($this->check()) {
             Console::stderr("Command parameter error\n");
             $this->usage();
         }
@@ -167,20 +196,20 @@ class Command
     public function usage()
     {
         $content = "{$this->name} command usage: ";
-        foreach ($this->optionDefs as $key => $option) {
+        foreach ($this->optionDefs as $key => $optionDef) {
             $content .= "\n\t-{$key}";
-            if ($option['longName']) {
-                $content .= ", --{$option['longName']}";
+            if ($optionDef['longName']) {
+                $content .= ", --{$optionDef['longName']}";
             }
-            if ($option['requireValue'] || $option['optionalValue']) {
-                if ($option['valueDesc']) {
-                    $content .= $option['requireValue'] ? "<{$option['valueDesc']}>" : "[{$option['valueDesc']}]";
+            if ($optionDef['isHasValue']) {
+                if ($optionDef['valueDesc']) {
+                    $content .= $optionDef['isOptionalValue'] ? "<{$optionDef['valueDesc']}>" : "[{$optionDef['valueDesc']}]";
                 }
             }
-            $content .= "\t" . ($option['comment'] ?? '') .
-                ($option['defaultValue'] ? "[default: {$option['defaultValue']}]" : '');
+            $content .= "\t" . ($optionDef['comment'] ?? '') .
+                ($optionDef['defaultValue'] ? "[default: {$optionDef['defaultValue']}]" : '');
         }
 
-        Console::stdout($content);
+        Console::stdout("$content\n");
     }
 }
