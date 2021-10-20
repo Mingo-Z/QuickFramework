@@ -54,7 +54,7 @@ class Command
      * @return $this
      * @throws Exception
      */
-    public function action(
+    public function option(
         $shortOptName,
         $longOptName = null,
         $required = false,
@@ -118,16 +118,16 @@ class Command
      *
      * @return array
      */
-    public function options()
+    public function optionValues()
     {
-        $options = [];
+        $values = [];
         foreach ($this->optionDefs as $key => $optionDef) {
             if (($value = $this->optionValue($key))) {
-                $options[$key] = $value;
+                $values[$key] = $value;
             }
         }
 
-        return $options;
+        return $values;
     }
 
     protected function check()
@@ -150,7 +150,7 @@ class Command
      * @return $this
      * @throws Exception
      */
-    public function parse()
+    public function parse(array $argv)
     {
         if (!$this->optionDefs) {
             throw new Exception('Missing command parameter configuration');
@@ -158,8 +158,9 @@ class Command
 
         $shortOptionName = null;
         $index = 0;
-        while (++$index < $_SERVER['argc']) {
-            switch (($arg = $_SERVER['argv'][$index])) {
+        $argc = count($argv);
+        while (++$index < $argc) {
+            switch (($arg = $argv[$index])) {
                 case !strncmp($arg, '--', 2):
                     $longOptionName = ltrim($arg, '-');
                     $shortOptionName = $this->longShortOptionNameMap[$longOptionName] ?? null;
@@ -172,7 +173,7 @@ class Command
             if ($shortOptionName) {
                 $option = $this->optionDefs[$shortOptionName];
                 if ($option['isHasValue']) {
-                    $nextArg = $_SERVER['argv'][$index + 1] ?? '';
+                    $nextArg = $argv[$index + 1] ?? '';
                     if (strpos($nextArg, '-') === false) {
                         $this->parsedOptionResults[$shortOptionName] = $nextArg;
                         $index++;
