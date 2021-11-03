@@ -24,7 +24,7 @@ class Processor
     /**
      * 裁剪图片
      *
-     * @param string $dstFilename 目标文件
+     * @param string $srcFilename 目标文件
      * @param int $startPosX 开始坐标X
      * @param int $startPosY 开始坐标Y
      * @param int $endPosX 结束坐标X
@@ -34,7 +34,7 @@ class Processor
      * @return bool
      * @throws Exception
      */
-    public static function crop($dstFilename, $startPosX, $startPosY, $endPosX, $endPosY, $saveFilename, $saveFileType = self::IMAGETYPE_PNG)
+    public static function crop($srcFilename, $startPosX, $startPosY, $endPosX, $endPosY, $saveFilename, $saveFileType = self::IMAGETYPE_PNG)
     {
         $ret = false;
 
@@ -43,7 +43,7 @@ class Processor
         if ($dstWidth < 0 || $dstHeight < 0) {
             throw new Exception('Wrong cropped area');
         }
-        $srcImage = self::getImageHandle($dstFilename);
+        $srcImage = self::getImageHandle($srcFilename);
         $dstImage = imagecreatetruecolor($dstWidth, $dstHeight);
         $isOk = imagecopyresampled($dstImage, $srcImage,
             0, 0, $startPosX, $startPosY,
@@ -53,6 +53,38 @@ class Processor
         }
         imagedestroy($srcImage);
         imagedestroy($dstImage);
+
+        return $ret;
+    }
+
+    /**
+     * 按比例调整图片大小
+     *
+     * @param string $srcFilename 源文件
+     * @param int $scale 调整比例
+     * @param string $saveFilename 保存文件
+     * @param int $saveFileType 保存文件类型
+     * @return bool
+     * @throws Exception
+     */
+    public static function resize($srcFilename, $scale = 1, $saveFilename, $saveFileType = self::IMAGETYPE_JPEG)
+    {
+        $ret = false;
+        $srcImageMetadata = self::getImageMetadata($srcFilename);
+        if ($scale <= 0) {
+            throw new Exception('The resize scale must be greater than 0');
+        }
+        $scale = round($scale, 1);
+        $newImageWidth = floor($srcImageMetadata[0] * $scale);
+        $newImageHeight = floor($srcImageMetadata[1] * $scale);
+        $newImage = imagecreatetruecolor($newImageWidth, $newImageHeight);
+        $srcImage = self::getImageHandle($srcFilename);
+        if (imagecopyresampled($newImage, $srcImage, 0, 0, 0, 0,
+            $newImageWidth, $newImageHeight, $srcImageMetadata[0], $srcImageMetadata[1])) {
+            $ret = self::saveAsFile($newImage, $saveFilename, $saveFileType);
+        }
+        imagedestroy($srcImage);
+        imagedestroy($newImage);
 
         return $ret;
     }
