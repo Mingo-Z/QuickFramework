@@ -184,4 +184,22 @@ class RedisQueueProvider extends Provider
         }
         return $ret;
     }
+
+    /**
+     * @param mixed $value
+     * @param int $count =0 删除队列中所有等于$value的元素，> 0 从队尾搜索删除$count个值等于$value的元素，< 0
+     * 从队头搜索abs($count)个值等于$value的元素
+     * @return int
+     * @throws \Qf\Kernel\Exception
+     */
+    public function lRemove($value, $count = 0)
+    {
+        $delNum = 0;
+        $count = (int)$count;
+        if ($this->isConnected()) {
+            $delNum = $this->connection->lRemove($this->realKey(), $this->encode($value), $count);
+        }
+
+        return $delNum;
+    }
 }
