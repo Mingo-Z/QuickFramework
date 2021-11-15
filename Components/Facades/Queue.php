@@ -17,7 +17,7 @@ use Qf\Components\Redis\RedisQueueProvider;
  * @method static mixed rPop()
  * @method static mixed brPop($timeout = 0)
  * @method static bool deleteKey($cusName = null)
- * @method static int lRemove($value, $count = 0)
+ * @method static int lRemove($elem, $count = 0)
  * @method static RedisQueueProvider setName($name)
  *
  */
