@@ -200,6 +200,7 @@ class RedisQueueProvider extends Provider
         $count = (int)$count;
         if ($this->isConnected()) {
             $delNum = $this->connection->lRemove($this->realKey(), $this->encode($elem), $count);
+            $this->checkError();
         }
 
         return $delNum;
