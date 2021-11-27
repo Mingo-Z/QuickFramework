@@ -3,6 +3,7 @@ namespace Qf\Queue\Jobs;
 
 use Qf\Components\IdGeneratorProvider;
 use Qf\Components\ProcessManagerProvider;
+use Qf\Kernel\Exception;
 use Qf\Kernel\ExceptionErrorHandle;
 
 class JobManager
@@ -34,7 +35,12 @@ class JobManager
         return $workerJobClass::create($rawJob);
     }
 
-    public static function daemon(WorkerJob $job)
+    /**
+     * 添加作业进程
+     *
+     * @param WorkerJob $job
+     */
+    public static function addWorker(WorkerJob $job)
     {
         ProcessManagerProvider::addWorker($job->getName(), function () use ($job) {
             while (1) {
@@ -51,7 +57,11 @@ class JobManager
                         pcntl_alarm($taskJob->timeout);
                         $isPcntlAlarmTimeout = true;
                     }
-                    self::runWorkerJob($taskJob);
+                    try {
+                        self::runWorkerJob($taskJob);
+                    } catch (Exception $e) {
+                        ExceptionErrorHandle::exceptionHandle(new JobException($e->getMessage(), $e->getCode(), $e->getPrevious(), $taskJob));
+                    }
                     if ($isPcntlAlarmTimeout) {
                         pcntl_alarm(0);
                     }
@@ -60,8 +70,6 @@ class JobManager
                 }
             }
         });
-
-        ProcessManagerProvider::daemon();
     }
 
     public static function runWorkerJob(WorkerJob $workerJob)

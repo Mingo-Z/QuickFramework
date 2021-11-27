@@ -16,6 +16,14 @@ class ProcessManagerProvider extends Provider
         ];
     }
 
+    /**
+     * 添加作业进程
+     *
+     * @param string $name 作业名称
+     * @param callable $callback 处理器
+     * @param int $num 进程数量
+     * @param array $arguments 作业参数
+     */
     public static function addWorkers($name, callable $callback, $num, array $arguments = [])
     {
         $num = (int)max($num, 1);

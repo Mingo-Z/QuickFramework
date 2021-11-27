@@ -51,7 +51,7 @@ abstract class WorkerJob extends Job
      */
     protected $delay;
 
-    protected function __construct(array $job)
+    protected function __construct(array $job = null)
     {
         $this->job = $job;
     }
