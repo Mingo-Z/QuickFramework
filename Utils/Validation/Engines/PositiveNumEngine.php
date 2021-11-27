@@ -3,7 +3,7 @@ namespace Qf\Utils\Validation\Engines;
 
 class PositiveNumEngine extends Engine
 {
-    public static function make($value, $argsDesc = null)
+    public static function make($value, array $argsDesc = null)
     {
         $value = (int)$value;
 

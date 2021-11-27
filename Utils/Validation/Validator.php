@@ -73,7 +73,7 @@ class Validator
         return $engines;
     }
 
-    public static function makeEngine($name, $value, $argsDesc = null)
+    public static function makeEngine($name, $value, array $argsDesc = null)
     {
         $method = 'make';
         $engineClass = self::$registeredEngines[$name] ?? self::$predefineEngines[$name] ?? null;

@@ -3,7 +3,7 @@ namespace Qf\Utils\Validation\Engines;
 
 abstract class Engine
 {
-    abstract public static function make($value, $argsDesc = null);
+    abstract public static function make($value, array $argsDesc = null);
 
     protected static function getArgArray($argsDesc)
     {

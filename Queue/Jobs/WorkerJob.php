@@ -7,32 +7,53 @@ use Qf\Queue\Queue;
 abstract class WorkerJob extends Job
 {
     /**
-     * 最大重试次数
+     * 最大重试次数，继承类属性赋值
      *
      * @var int
      */
     public $tries;
     /**
-     * 任务最长执行时间
+     * 任务最长执行时间，继承类属性赋值
      * @todo 基于pcntl async signal实现
      *
      * @var int
      */
     public $timeout;
 
+    /**
+     * 队列名称，继承类属性赋值
+     *
+     * @var string
+     */
     protected $queue;
+
+    /**
+     * mq组件名称，继承类属性赋值
+     *
+     * @var string
+     */
     protected $connectionName;
     /**
      * @var string
      */
+
+    /**
+     * mq驱动类名，继承类属性赋值
+     *
+     * @var Queue
+     */
     protected $driverClass;
 
+    /**
+     * 消息延时指定秒处理
+     *
+     * @var int
+     */
     protected $delay;
 
-    protected function __construct(array $job = null, $queue = null)
+    protected function __construct(array $job)
     {
         $this->job = $job;
-        $this->queue = $queue;
     }
 
     public function __sleep()
