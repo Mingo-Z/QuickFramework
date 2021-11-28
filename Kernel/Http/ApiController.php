@@ -13,7 +13,7 @@ abstract class ApiController extends Controller
         4 => 'Operation failed, please try again later',
     ];
 
-    protected $businessErrorTable;
+    protected $businessErrorTable = [];
     protected $code;
     protected $message;
     protected $data;
@@ -24,7 +24,6 @@ abstract class ApiController extends Controller
 
         $this->code = 0;
         $this->message = '';
-        $this->businessErrorTable = [];
     }
 
     protected function addBusinessErrorTableItem($code, $message)
@@ -32,11 +31,18 @@ abstract class ApiController extends Controller
         $this->businessErrorTable[(int)$code] = (string)$message;
     }
 
+    protected function setCodeAndMessage($code, $message = '')
+    {
+        $this->code = (int)$code;
+        $this->message = (string)$message;
+
+        return $this;
+    }
+
     protected function setResponseJsonBody()
     {
-        $errorTable = array_merge($this->businessErrorTable, $this->internalErrorTable);
         if (!$this->message) {
-            $this->message = $errorTable[$this->code] ?? '';
+            $this->message = $this->internalErrorTable[$this->code] ?? $this->businessErrorTable[$this->code] ?? '';
         }
         $body = [
             'code' => $this->code,
