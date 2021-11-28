@@ -39,19 +39,30 @@ abstract class ApiController extends Controller
         return $this;
     }
 
-    protected function setResponseJsonBody()
+    protected function getMessage()
     {
-        if (!$this->message) {
-            $this->message = $this->internalErrorTable[$this->code] ?? $this->businessErrorTable[$this->code] ?? '';
+        $message = $this->message ?: ($this->internalErrorTable[$this->code]
+            ?? $this->businessErrorTable[$this->code] ?? '');
+        if ($message) {
+            $langMessage = translate($message);
         }
-        $body = [
+
+        return $langMessage;
+    }
+
+    protected function getResponseJsonBody()
+    {
+        return [
             'code' => $this->code,
-            'message' => translate($this->message),
+            'message' => $this->getMessage(),
             'data' => $this->data,
             'timestamp' => getNowTimestampMs(),
         ];
+    }
 
-        return $this->app->response->setJsonContent($body);
+    protected function responseJsonBody()
+    {
+        return $this->app->response->setJsonContent($this->getResponseJsonBody());
     }
 
 }
