@@ -69,6 +69,7 @@ class Application
         }
 
         ExceptionErrorHandle::installHandle(isDebug());
+        ShutdownScheduler::init();
     }
 
     protected static function registerMiddleware()
