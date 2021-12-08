@@ -36,8 +36,7 @@ class EventManager
     public function triggerEvent($eventName, array $context = null, $isAsync = false)
     {
         $this->isEvent($eventName);
-        $eventDriver = $this->registeredEventDrivers[$eventName];
-        $event = new $eventDriver(self::getEventId(), $context, $isAsync);
+        $event = new $eventName(self::getEventId(), $context, $isAsync);
         foreach ($this->getEventListeners($eventName) as $listener) {
             $event->addListener($listener);
         }
@@ -76,7 +75,7 @@ class EventManager
         $queue = null;
 
         if (!$queue) {
-            $eventConfig = Application::getCom()->config->app->config->event;
+            $eventConfig = Application::getCom()->config->app->event;
             if (!$eventConfig || !$eventConfig->queueComponentName
                 || !($queue = Application::getCom()->{$eventConfig->queueComponentName})) {
                 throw new Exception('Asynchronous event queue component configuration error');
