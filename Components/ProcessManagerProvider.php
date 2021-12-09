@@ -61,7 +61,7 @@ class ProcessManagerProvider extends Provider
         return extension_loaded('pcntl') && function_exists('pcntl_async_singal');
     }
 
-    protected static function signal()
+    protected static function installSignalHandle()
     {
         pcntl_signal(SIGINT, SIG_IGN);
 //        pcntl_signal(SIGHUP, SIG_IGN); // kill
@@ -87,7 +87,7 @@ class ProcessManagerProvider extends Provider
                     $STDOUT = fopen(self::$logFilePath, 'ab');
                     $STDERR = fopen(self::$logFilePath, 'ab');
                 }
-                self::signal();
+                self::installSignalHandle();
                 self::runWorkers();
                 while (1) {
                     $status = 0;
@@ -98,7 +98,11 @@ class ProcessManagerProvider extends Provider
                     self::runWorker($exitWorker);
                     time_nanosleep(0, 1000);
                 }
+            } else {
+                exit(0);
             }
+        } else {
+            exit(0);
         }
     }
 }
