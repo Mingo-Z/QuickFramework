@@ -158,7 +158,4 @@ class EventManager
     {
         return IdGenerator::getId();
     }
-
-
-
 }

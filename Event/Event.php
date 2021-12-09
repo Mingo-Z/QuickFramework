@@ -84,5 +84,4 @@ abstract class Event
         $this->createdAt = time();
         $this->listeners = [];
     }
-
 }
