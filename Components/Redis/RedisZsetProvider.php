@@ -78,7 +78,6 @@ class RedisZsetProvider extends Provider
             $values = $this->connection->zRangeByScore($this->realKey(), $min, $max, $options);
             $this->checkError();
             if ($values) {
-                $elems = [];
                 foreach ($values as $index => $value) {
                     $elems[$index] = $this->decode($value);
                     if ($isPop) {
