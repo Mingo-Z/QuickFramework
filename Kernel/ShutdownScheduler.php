@@ -18,9 +18,7 @@ final class ShutdownScheduler
 
     public static function execute()
     {
-        if (function_exists('fastcgi_finish_request')) {
-            fastcgi_finish_request();
-        }
+        fastFinishFastCGIRequest();
         foreach (self::$callbacks as $arguments) {
             call_user_func($arguments[0], ...$arguments[1]);
         }

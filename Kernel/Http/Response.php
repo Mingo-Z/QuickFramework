@@ -325,9 +325,7 @@ class Response
     protected function _sendContent()
     {
         echo $this->isEncodeContentJson ? json_encode($this->content) : $this->content;
-        if (function_exists('fastcgi_finish_request')) {
-            fastcgi_finish_request();
-        }
+        fastFinishFastCGIRequest();
     }
 
     /**

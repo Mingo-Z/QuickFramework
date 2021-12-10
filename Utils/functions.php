@@ -505,4 +505,13 @@ function isDebug()
     return envIniConfig('appIsDebug', 'global', true);
 }
 
+function fastFinishFastCGIRequest()
+{
+    if (!isPhpCommandMode() && function_exists('fastcgi_finish_request')) {
+        if (session_status() === PHP_SESSION_ACTIVE) {
+            session_write_close(); // 在中断客户端连接，执行耗时逻辑之前关闭session，防止session文件一直被锁住
+        }
+        fastcgi_finish_request();
+    }
+}
 
