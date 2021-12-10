@@ -205,4 +205,28 @@ class RedisQueueProvider extends Provider
 
         return $delNum;
     }
+
+    /**
+     * 获取队列指定位置和偏移量的元素，但是不会从队列里删除
+     *
+     * @param int $startPos
+     * @param int $endPos
+     * @return array
+     * @throws \Qf\Kernel\Exception
+     */
+    public function list(int $startPos, int $endPos)
+    {
+        $elems = [];
+        if ($this->isConnected()) {
+            $values = $this->connection->lGetRange($this->realKey(), $startPos, $endPos);
+            $this->checkError();
+            if ($values) {
+                foreach ($values as $value) {
+                    $elems[] = $this->decode($value);
+                }
+            }
+        }
+
+        return $elems;
+    }
 }

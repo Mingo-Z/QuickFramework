@@ -19,6 +19,7 @@ use Qf\Components\Redis\RedisQueueProvider;
  * @method static bool deleteKey($cusName = null)
  * @method static int lRemove($elem, $count = 0)
  * @method static RedisQueueProvider setName($name)
+ * @method static array list(int $startPos, int $endPos)
  *
  */
 class Queue extends Facade
