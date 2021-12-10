@@ -20,6 +20,7 @@ class RedisZsetProvider extends Provider
 
         if ($this->isConnected()) {
             $ret = $this->connection->zAdd($this->realKey(), $score, $this->encode($elem));
+            $this->checkError();
         }
 
         return $ret;
@@ -33,6 +34,7 @@ class RedisZsetProvider extends Provider
         if (((is_numeric($max) || $max == '+inf') && (is_numeric($min) || $min == '-inf'))
             && $this->isConnected()) {
             $ret = $this->connection->zCount($this->realKey(), $min, $max);
+            $this->checkError();
         }
 
         return $ret;
@@ -43,6 +45,7 @@ class RedisZsetProvider extends Provider
         $ret = false;
         if ($this->isConnected()) {
             $ret = $this->connection->zDelete($this->realKey(), $this->encode($elem));
+            $this->checkError();
         }
 
         return $ret;
@@ -54,6 +57,7 @@ class RedisZsetProvider extends Provider
         if (((is_numeric($max) || $max == '+inf') && (is_numeric($min) || $min == '-inf'))
             && $this->isConnected()) {
             $ret = $this->connection->zDeleteRangeByScore($this->realKey(), $min, $max);
+            $this->checkError();
         }
 
         return $ret;
@@ -61,7 +65,8 @@ class RedisZsetProvider extends Provider
 
     public function listElems($min = null, $max = null, $offset = null, $limit = null, $isPop = false)
     {
-        $ret = false;
+        $elems = [];
+
         $min = $min ?: '-inf';
         $max = $max ?: '+inf';
         if (((is_numeric($max) || $max == '+inf') && (is_numeric($min) || $min == '-inf'))
@@ -71,17 +76,18 @@ class RedisZsetProvider extends Provider
                 $options['limit'] = [(int)$offset, (int)$limit];
             }
             $values = $this->connection->zRangeByScore($this->realKey(), $min, $max, $options);
+            $this->checkError();
             if ($values) {
-                $ret = [];
+                $elems = [];
                 foreach ($values as $index => $value) {
-                    $ret[$index] = $this->decode($value);
+                    $elems[$index] = $this->decode($value);
                     if ($isPop) {
-                        $this->del($ret[$index]);
+                        $this->del($elems[$index]);
                     }
                 }
             }
         }
 
-        return $ret;
+        return $elems;
     }
 }

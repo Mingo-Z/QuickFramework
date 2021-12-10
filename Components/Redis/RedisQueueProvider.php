@@ -214,7 +214,7 @@ class RedisQueueProvider extends Provider
      * @return array
      * @throws \Qf\Kernel\Exception
      */
-    public function list(int $startPos, int $endPos)
+    public function listElems(int $startPos, int $endPos)
     {
         $elems = [];
         if ($this->isConnected()) {
