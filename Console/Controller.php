@@ -25,19 +25,19 @@ class Controller extends HttpController
     ]
      *
      */
-    protected static $runArgDefineArray;
+    protected static $optionDefs;
 
     public function __call($command, array $arguments)
     {
         $command = strtolower($command);
-        if (static::$runArgDefineArray) {
-            if (!isset(static::$runArgDefineArray[$command])) {
+        if (static::$optionDefs) {
+            if (!isset(static::$optionDefs[$command])) {
                 throw new Exception(static::class . ": $command is not a command");
             }
-            $formattedArgs = isset($arguments[0]) ? (array)$arguments[0] : [];
-            $formattedArgs = $this->formatRunArgs($command, $formattedArgs);
-            if ($this->processingRunArgs($command, $formattedArgs)) {
-                parent::__call($command, [$formattedArgs]);
+            $runCmdArgs = isset($arguments[0]) ? (array)$arguments[0] : [];
+            $formattedRunCmdArgs = $this->formatRunCmdArgs($command, $runCmdArgs);
+            if ($this->checkRunCmdArgs($command, $formattedRunCmdArgs)) {
+                parent::__call($command, [$formattedRunCmdArgs]);
             } else {
                 throw new Exception('Command parameter passed error');
             }
@@ -46,62 +46,63 @@ class Controller extends HttpController
         }
     }
 
-    protected function processingRunArgs($command, array $args)
+    protected function checkRunCmdArgs($command, array $args)
     {
-        $isProcessed = true;
-        foreach (static::$runArgDefineArray[$command] as $name => $def) {
-            $isRequired = (isset($def['required']) && $def['required']);
-            if ($isRequired && !isset($args[$name])) {
-                $isProcessed = false;
+        $isOk = true;
+        foreach (static::$optionDefs[$command] as $optionName => $optionDef) {
+            $isRequired = (isset($optionDef['required']) && $optionDef['required']);
+            if ($isRequired && !isset($args[$optionName])) {
+                $isOk = false;
                 break;
             }
         }
-        if (!$isProcessed) {
+        if (!$isOk) {
             self::usage($command);
         }
 
-        return $isProcessed;
+        return $isOk;
     }
 
-    protected function formatRunArgs($command, array $args)
+    protected function formatRunCmdArgs($command, array $args)
     {
-        $formattedArgs = [];
-        $formattedValue = null;
-        foreach ($args as $name => $value) {
-            if (isset(static::$runArgDefineArray[$command][$name])) {
-                $def = static::$runArgDefineArray[$command][$name];
-                switch ($def['type']) {
+        $formattedRunCmdArgs = [];
+        $formattedOptionValue = null;
+
+        foreach ($args as $optionName => $optionValue) {
+            if (isset(static::$optionDefs[$command][$optionName])) {
+                $optionDef = static::$optionDefs[$command][$optionName];
+                switch ($optionDef['type']) {
                     case 'int':
-                        $formattedValue = (int)$value;
+                        $formattedOptionValue = (int)$optionValue;
                         break;
                     case 'bool':
-                        $formattedValue = true;
+                        $formattedOptionValue = true;
                         break;
                     default:
-                        $formattedValue = $value;
+                        $formattedOptionValue = $optionValue;
                 }
-                if (isset($def['options']) && is_array($def['options']) && !in_array($formattedValue, $def['options'], true)) {
-                    $formattedValue = null;
+                if (isset($optionDef['options']) && is_array($optionDef['options']) && !in_array($formattedOptionValue, $optionDef['options'], true)) {
+                    $formattedOptionValue = null;
                 }
-                if (is_null($formattedValue) || $formattedValue === '') {
-                    $isRequired = (isset($def['required']) && $def['required']);
-                    if (!$isRequired && isset($def['defaultValue'])) {
-                        $formattedValue = $def['defaultValue'];
+                if (is_null($formattedOptionValue) || $formattedOptionValue === '') {
+                    $isRequired = (isset($optionDef['required']) && $optionDef['required']);
+                    if (!$isRequired && isset($optionDef['defaultValue'])) {
+                        $formattedOptionValue = $optionDef['defaultValue'];
                     }
                 }
-                if (!is_null($formattedValue) && $formattedValue !== '') {
-                    $formattedArgs[$name] = $formattedValue;
+                if ($formattedOptionValue) {
+                    $formattedRunCmdArgs[$optionName] = $formattedOptionValue;
                 }
             }
         }
 
-        return $formattedArgs;
+        return $formattedRunCmdArgs;
     }
 
     protected static function usage($command)
     {
         Console::stdout('usage: ' . static::class . " $command\n");
-        foreach (static::$runArgDefineArray[$command] as $name => $def) {
+        foreach (static::$optionDefs[$command] as $name => $def) {
             $line = "\t{$def['prefix']}$name " . ((isset($def['required']) && $def['required']) ? 'required' : 'optional');
             if (isset($def['options']) && is_array($def['options'])) {
                 $line .= ', options: ' . join(',', $def['options']);

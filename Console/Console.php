@@ -9,7 +9,7 @@ require_once __DIR__ . '/../Kernel/Application.php';
 
 class Console extends Application
 {
-    protected $runCmdArgs;
+    protected $parsedRunCmdArgs;
 
     protected function __construct($appPath)
     {
@@ -18,6 +18,7 @@ class Console extends Application
         if (!$this->request->isCli()) {
             throw new Exception('Console can only be run in command line mode');
         }
+        $this->parsedRunCmdArgs = [];
         $this->parseRunCmdArgs();
     }
 
@@ -35,7 +36,7 @@ class Console extends Application
             throw new Exception("Console controller $class class does not exists");
         }
         $controllerInstance = new $class($this);
-        $result = $controllerInstance->$action($this->runCmdArgs);
+        $result = $controllerInstance->$action($this->parsedRunCmdArgs);
         if (!is_null($result)) {
             if (!is_scalar($result)) {
                 $result = json_encode($result);
@@ -114,22 +115,22 @@ class Console extends Application
         $argv = $this->request->getArgv();
         if (count($argv) >= 2) {
             array_shift($argv);
+            $parseArgc = count($argv);
             $index = 0;
-            $argCount = count($argv);
-            while ($index < $argCount) {
+            while ($index < $parseArgc) {
                 $cntArg = $argv[$index];
-                $nextArg = isset($argv[$index + 1]) ? $argv[$index + 1] : null;
+                $nextArg = $argv[$index + 1] ?? null;
                 switch ($cntArg) {
                     case '-m':
                     case '-c':
                     case '-a':
                         if ($nextArg && $nextArg[0] != '-') {
                             if ($cntArg == '-m') {
-                                $this->runCmdArgs['module'] = $nextArg;
+                                $this->parsedRunCmdArgs['module'] = $nextArg;
                             } elseif ($cntArg == '-c') {
-                                $this->runCmdArgs['controller'] = $nextArg;
+                                $this->parsedRunCmdArgs['controller'] = $nextArg;
                             } else {
-                                $this->runCmdArgs['action'] = $nextArg;
+                                $this->parsedRunCmdArgs['action'] = $nextArg;
                             }
                             $index++;
                         }
@@ -138,13 +139,13 @@ class Console extends Application
                         if ($cntArg[0] == '-') {
                             $key = ltrim($cntArg, '-');
                             if ($nextArg && $nextArg[0] != '-') {
-                                $this->runCmdArgs[$key] = $nextArg;
+                                $this->parsedRunCmdArgs[$key] = $nextArg;
                                 $index++;
                             } else {
-                                $this->runCmdArgs[$key] = '';
+                                $this->parsedRunCmdArgs[$key] = '';
                             }
                         } else {
-                            $this->runCmdArgs[] = $cntArg;
+                            $this->parsedRunCmdArgs[] = $cntArg;
                         }
 
                 }
@@ -155,17 +156,17 @@ class Console extends Application
 
     public function getControllerName($default = null)
     {
-        return isset($this->runCmdArgs['controller']) ? $this->runCmdArgs['controller'] : $default;
+        return $this->parsedRunCmdArgs['controller'] ?? $default;
     }
 
     public function getActionName($default = null)
     {
-        return isset($this->runCmdArgs['action']) ? $this->runCmdArgs['action'] : $default;
+        return $this->parsedRunCmdArgs['action'] ?? $default;
     }
 
     public function getModuleName($default = null)
     {
-        return isset($this->runCmdArgs['module']) ? $this->runCmdArgs['module'] : $default;
+        return $this->parsedRunCmdArgs['module'] ?? $default;
     }
 
 }

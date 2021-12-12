@@ -2,6 +2,7 @@
 - PHP fast development framework!
 - Require PHP version 7.1+
 
+***
 ## Quick start
 ```php
 <?php
