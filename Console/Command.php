@@ -249,9 +249,9 @@ class Command
 
     public function usage()
     {
-        $content = "{$this->name} command usage: ";
+        $content = "{$this->name} command usage: \nOptions:";
         foreach ($this->optionDefs as $key => $optionDef) {
-            $content .= "\n\t-{$key}";
+            $content .= "\n  -{$key}";
             if ($optionDef['longName']) {
                 $content .= ", --{$optionDef['longName']}";
             }
