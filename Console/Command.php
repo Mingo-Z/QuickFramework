@@ -169,10 +169,12 @@ class Command
                 $optionValue = null;
                 if (strpos($cntArg, '-') !== false) {
                     $optionName = ltrim($cntArg, '-');
-                    $nextArg = $argv[$index + 1];
-                    if (strpos($nextArg, '-') === false) {
+                    $nextArg = $argv[$index + 1] ?? null;
+                    if ($nextArg && strpos($nextArg, '-') === false) {
                         $optionValue = $nextArg;
                         $index++;
+                    } else {
+                        $optionValue = true;
                     }
                 }
 
