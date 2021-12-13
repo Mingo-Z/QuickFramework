@@ -117,9 +117,9 @@ class Console extends Application
         $command->setName('console')
             ->setOption('m', 'module', false, true, false,
             null, null, 'Module name')
-            ->setOption('c', 'controller', true, true, false,
+            ->setOption('c', 'controller', false, true, false,
                 null, null, 'Controller name')
-            ->setOption('a', 'action', true, true, false,
+            ->setOption('a', 'action', false, true, false,
                 null, null, 'Controller action name');
         $isOk = $command->parse($this->request->getArgv());
         if ($isOk) {

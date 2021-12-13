@@ -144,7 +144,7 @@ class Command
         foreach ($this->optionDefs as $key => $optionDef) {
             if ($optionDef['required'] && !isset($this->parsedOptionResults[$key])) {
                 $errOptions[$key] = $optionDef;
-            } elseif ($optionDef['isHasValue'] && !$this->getOptionValue($key)) {
+            } elseif (isset($this->parsedOptionResults[$key]) && $optionDef['isHasValue'] && !$this->getOptionValue($key)) {
                 $errOptions[$key] = $optionDef;
             }
         }
@@ -223,8 +223,8 @@ class Command
                     break;
             }
             if ($shortOptionName) {
-                $option = $this->optionDefs[$shortOptionName];
-                if ($option['isHasValue']) {
+                $optionDef = $this->optionDefs[$shortOptionName];
+                if ($optionDef['isHasValue']) {
                     $nextArg = $argv[$index + 1] ?? '';
                     if (strpos($nextArg, '-') === false) {
                         $this->parsedOptionResults[$shortOptionName] = $nextArg;
