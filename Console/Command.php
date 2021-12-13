@@ -33,7 +33,7 @@ class Command
      */
     protected $parsedOptionResults = [];
 
-    public function name($name)
+    public function setName($name)
     {
         $this->name = $name;
 
@@ -54,7 +54,7 @@ class Command
      * @return $this
      * @throws Exception
      */
-    public function option(
+    public function setOption(
         $shortOptName,
         $longOptName = null,
         $required = false,
@@ -94,20 +94,24 @@ class Command
      * 获取指定参值
      *
      * @param string $name 参数名
-     * @param bool $isLongName 是否是长名称
+     * @param bool $isLongName 是否是长名称，无参数定义时，该参数不生效
      * @return mixed|null
      */
-    public function optionValue($name, $isLongName = false)
+    public function getOptionValue($name, $isLongName = false)
     {
         $value = null;
 
-        $shortName = $isLongName ? ($this->longShortOptionNameMap[$isLongName] ?? '') : $name;
-        if (isset($this->parsedOptionResults[$name])) {
-            if ($this->parsedOptionResults[$shortName]) {
-                $value = $this->parsedOptionResults[$shortName];
-            } elseif ($this->optionDefs[$shortName]['isOptionalValue']) {
-                $value = $this->optionDefs[$shortName]['defaultValue'];
+        if ($this->optionDefs) {
+            $shortName = $isLongName ? ($this->longShortOptionNameMap[$name] ?? '') : $name;
+            if ($shortName && isset($this->parsedOptionResults[$shortName])) {
+                if ($this->parsedOptionResults[$shortName]) {
+                    $value = $this->parsedOptionResults[$shortName];
+                } elseif ($this->optionDefs[$shortName]['isOptionalValue']) {
+                    $value = $this->optionDefs[$shortName]['defaultValue'];
+                }
             }
+        } elseif (isset($this->parsedOptionResults[$name])) {
+            $value = $this->parsedOptionResults[$name];
         }
 
         return $value;
@@ -118,13 +122,17 @@ class Command
      *
      * @return array
      */
-    public function optionValues()
+    public function getOptionValues()
     {
         $values = [];
-        foreach ($this->optionDefs as $key => $optionDef) {
-            if (($value = $this->optionValue($key))) {
-                $values[$key] = $value;
+        if ($this->optionDefs) {
+            foreach ($this->optionDefs as $key => $optionDef) {
+                if (($value = $this->getOptionValue($key))) {
+                    $values[$key] = $value;
+                }
             }
+        } else {
+            $values = $this->parsedOptionResults;
         }
 
         return $values;
@@ -136,7 +144,7 @@ class Command
         foreach ($this->optionDefs as $key => $optionDef) {
             if ($optionDef['required'] && !isset($this->parsedOptionResults[$key])) {
                 $errOptions[$key] = $optionDef;
-            } elseif ($optionDef['isHasValue'] && !$this->optionValue($key)) {
+            } elseif ($optionDef['isHasValue'] && !$this->getOptionValue($key)) {
                 $errOptions[$key] = $optionDef;
             }
         }
@@ -145,20 +153,64 @@ class Command
     }
 
     /**
-     * 解析参数
+     *无参数定义解析
      *
+     * @param array $argv
+     * @return $this
+     */
+    protected function parseNoOptionDefs(array $argv)
+    {
+        $argc = count($argv);
+        if ($argc > 2) {
+            $index = 0;
+            while ($index < $argc) {
+                $cntArg = $argv[$index];
+                $optionName = null;
+                $optionValue = null;
+                if (strpos($cntArg, '-') !== false) {
+                    $optionName = ltrim($cntArg, '-');
+                    $nextArg = $argv[$index + 1];
+                    if (strpos($nextArg, '-') === false) {
+                        $optionValue = $nextArg;
+                        $index++;
+                    }
+                }
+
+                if ($optionName) {
+                    $this->parsedOptionResults[$optionName] = $optionValue;
+                }
+                $index++;
+            }
+        }
+
+        return $this;
+    }
+
+    /**
+     * 参数解析
+     *
+     * @param array $argv
      * @return $this
      * @throws Exception
      */
     public function parse(array $argv)
     {
-        if (!$this->optionDefs) {
-            throw new Exception('Missing command parameter configuration');
-        }
+        return $this->optionDefs ? $this->parseHasOptionDefs($argv) : $this->parseNoOptionDefs($argv);
+    }
 
+    /**
+     * 有参数定义解析
+     *
+     * @param array $argv
+     * @return $this
+     * @throws Exception
+     */
+    protected function parseHasOptionDefs(array $argv)
+    {
         $shortOptionName = null;
         $index = 0;
         $argc = count($argv);
+
         while (++$index < $argc) {
             switch (($arg = $argv[$index])) {
                 case !strncmp($arg, '--', 2):
@@ -189,6 +241,7 @@ class Command
         if ($this->check()) {
             Console::stderr("Command parameter error\n");
             $this->usage();
+            die();
         }
 
         return $this;

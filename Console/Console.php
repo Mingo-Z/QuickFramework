@@ -9,7 +9,9 @@ require_once __DIR__ . '/../Kernel/Application.php';
 
 class Console extends Application
 {
-    protected $parsedRunCmdArgs;
+    protected $moduleName;
+    protected $controllerName;
+    protected $actionName;
 
     protected function __construct($appPath)
     {
@@ -18,12 +20,12 @@ class Console extends Application
         if (!$this->request->isCli()) {
             throw new Exception('Console can only be run in command line mode');
         }
-        $this->parsedRunCmdArgs = [];
-        $this->parseRunCmdArgs();
     }
 
     public function execute()
     {
+        $this->route();
+
         $module = $this->getModuleName(envIniConfig('defaultModuleName', 'console'));
         $controller = $this->getControllerName(envIniConfig('defaultControllerName', 'console', 'Index'));
         $action = $this->getActionName(envIniConfig('defaultActionName', 'console', 'Index'));
@@ -36,7 +38,7 @@ class Console extends Application
             throw new Exception("Console controller $class class does not exists");
         }
         $controllerInstance = new $class($this);
-        $result = $controllerInstance->$action($this->parsedRunCmdArgs);
+        $result = $controllerInstance->$action();
         if (!is_null($result)) {
             if (!is_scalar($result)) {
                 $result = json_encode($result);
@@ -72,7 +74,7 @@ class Console extends Application
      */
     public static function setMaxMemory($bytes)
     {
-        return ini_set('memory_limit', $bytes);
+        return ini_set('memory_limit', (int)$bytes);
     }
 
     /**
@@ -109,64 +111,37 @@ class Console extends Application
         return file_put_contents('php://stderr', $message);
     }
 
-    protected function parseRunCmdArgs()
+    public function route()
     {
-        // -c controller name required
-        $argv = $this->request->getArgv();
-        if (count($argv) >= 2) {
-            array_shift($argv);
-            $parseArgc = count($argv);
-            $index = 0;
-            while ($index < $parseArgc) {
-                $cntArg = $argv[$index];
-                $nextArg = $argv[$index + 1] ?? null;
-                switch ($cntArg) {
-                    case '-m':
-                    case '-c':
-                    case '-a':
-                        if ($nextArg && $nextArg[0] != '-') {
-                            if ($cntArg == '-m') {
-                                $this->parsedRunCmdArgs['module'] = $nextArg;
-                            } elseif ($cntArg == '-c') {
-                                $this->parsedRunCmdArgs['controller'] = $nextArg;
-                            } else {
-                                $this->parsedRunCmdArgs['action'] = $nextArg;
-                            }
-                            $index++;
-                        }
-                        break;
-                    default:
-                        if ($cntArg[0] == '-') {
-                            $key = ltrim($cntArg, '-');
-                            if ($nextArg && $nextArg[0] != '-') {
-                                $this->parsedRunCmdArgs[$key] = $nextArg;
-                                $index++;
-                            } else {
-                                $this->parsedRunCmdArgs[$key] = '';
-                            }
-                        } else {
-                            $this->parsedRunCmdArgs[] = $cntArg;
-                        }
-
-                }
-                $index++;
-            }
+        $command = new Command();
+        $command->setName('console')
+            ->setOption('m', 'module', false, true, false,
+            null, null, 'Module name')
+            ->setOption('c', 'controller', true, true, false,
+                null, null, 'Controller name')
+            ->setOption('a', 'action', true, true, false,
+                null, null, 'Controller action name');
+        $isOk = $command->parse($this->request->getArgv());
+        if ($isOk) {
+            $this->moduleName = $command->getOptionValue('module', true);
+            $this->controllerName = $command->getOptionValue('controller', true);
+            $this->actionName = $command->getOptionValue('action', true);
         }
     }
 
     public function getControllerName($default = null)
     {
-        return $this->parsedRunCmdArgs['controller'] ?? $default;
+        return $this->controllerName ?? $default;
     }
 
     public function getActionName($default = null)
     {
-        return $this->parsedRunCmdArgs['action'] ?? $default;
+        return $this->actionName ?? $default;
     }
 
     public function getModuleName($default = null)
     {
-        return $this->parsedRunCmdArgs['module'] ?? $default;
+        return $this->moduleName ?? $default;
     }
 
 }
