@@ -26,9 +26,9 @@ class Console extends Application
     {
         $this->route();
 
-        $module = $this->getModuleName(envIniConfig('defaultModuleName', 'console'));
-        $controller = $this->getControllerName(envIniConfig('defaultControllerName', 'console', 'Index'));
-        $action = $this->getActionName(envIniConfig('defaultActionName', 'console', 'Index'));
+        $module = $this->getModuleName();
+        $controller = $this->getControllerName();
+        $action = $this->getActionName();
         $class = "Console\\{$controller}Controller";
         if ($module) {
             $class = $module . '\\' . $class;
@@ -88,8 +88,8 @@ class Console extends Application
         $ret = false;
 
         if ($seconds > 0) {
-            $nanoseconds = (int)$seconds * 1000000;
-            $ret = time_nanosleep((int)($nanoseconds/1000000), $nanoseconds % 1000000);
+            $nanoseconds = (int)($seconds * 1000000000);
+            $ret = time_nanosleep((int)$seconds, $nanoseconds % 1000000000);
         }
 
         return $ret;
@@ -129,19 +129,19 @@ class Console extends Application
         }
     }
 
-    public function getControllerName($default = null)
+    public function getControllerName()
     {
-        return $this->controllerName ?? $default;
+        return $this->controllerName ?? envIniConfig('defaultControllerName', 'console');
     }
 
-    public function getActionName($default = null)
+    public function getActionName()
     {
-        return $this->actionName ?? $default;
+        return $this->actionName ?? envIniConfig('defaultActionName', 'console');
     }
 
-    public function getModuleName($default = null)
+    public function getModuleName()
     {
-        return $this->moduleName ?? $default;
+        return $this->moduleName ?? envIniConfig('defaultModuleName', 'console');
     }
 
 }
