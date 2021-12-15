@@ -44,10 +44,10 @@ abstract class ApiController extends Controller
         $message = $this->message ?: ($this->internalErrorTable[$this->code]
             ?? $this->businessErrorTable[$this->code] ?? '');
         if ($message) {
-            $langMessage = translate($message);
+            $message = translate($message);
         }
 
-        return $langMessage;
+        return $message;
     }
 
     protected function getResponseJsonBody()
