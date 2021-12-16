@@ -131,12 +131,12 @@ class Console extends Application
 
     public function getControllerName()
     {
-        return $this->controllerName ?? envIniConfig('defaultControllerName', 'console');
+        return $this->controllerName ?? envIniConfig('defaultControllerName', 'console', 'Index');
     }
 
     public function getActionName()
     {
-        return $this->actionName ?? envIniConfig('defaultActionName', 'console');
+        return $this->actionName ?? envIniConfig('defaultActionName', 'console', 'index');
     }
 
     public function getModuleName()
