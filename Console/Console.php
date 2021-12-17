@@ -47,23 +47,39 @@ class Console extends Application
         }
     }
 
-    public static function runCommand($command, $argsDesc, array $args = null,
-                                      $isBackground = false, &$result = null)
+    /**
+     * 安全的执行命令，后台模式运行，可能返回非正确结果
+     *
+     * @param string $command 可执行命令
+     * @param string|array $arguments
+     * @param bool $isBackground 是否后台执行，不阻塞当前流程
+     * @param array|null $result 执行的输出
+     * @return int
+     */
+    public static function execCommand($command, $arguments = null, $isBackground = false, array &$result = null)
     {
-        $status = 1;
-        $runArgs = $argsDesc;
+        $resultCode = 1;
+        $cmdline = null;
 
-        if ($args) {
-            $args = array_map('escapeshellarg', $args);
-            $runArgs = vsprintf($argsDesc, $args);
+        if ($command) {
+            $cmdline .= escapeshellcmd($command);
+            if (is_string($arguments)) {
+                $cmdline .= ' ' . escapeshellarg($arguments);
+            } elseif (is_array($arguments)) {
+                foreach ($arguments as $key => $value) {
+                    if (is_string($key)) {
+                        $cmdline .= ' ' . escapeshellarg($key);
+                    }
+                    $cmdline .= ' ' . escapeshellarg($value);
+                }
+            }
+            if ($isBackground) {
+                $cmdline .= ' >/dev/null &';
+            }
+            exec($cmdline, $result, $resultCode);
         }
-        $fullCommand = escapeshellcmd($command) . ' ' . $runArgs . ' >> /dev/null 2>&1';
-        if ($isBackground) {
-            $fullCommand .= ' &';
-        }
-        exec($fullCommand, $result, $status);
 
-        return !$status;
+        return $resultCode;
     }
 
     /**
