@@ -54,6 +54,13 @@ class MysqlDistributedProvider extends Provider
      */
     protected $queryTimes;
 
+    /**
+     * 上次执行sql
+     *
+     * @var string
+     */
+    protected $lastSql;
+
     public function __construct()
     {
         $this->connectionId = 'default';
@@ -290,6 +297,7 @@ class MysqlDistributedProvider extends Provider
         if ($this->isConnected()) {
             $this->freeCntResult();
             $startQueryTime = microtime(true);
+            $this->lastSql = $sql;
             $this->cntResult = $this->connection->query($sql);
             $endQueryTime = microtime(true);
             Application::getCom()->sqllog->debug('SQL: ' . $sql . ', Execution Time: ' . round($endQueryTime - $startQueryTime, 3) . 'sec');
@@ -428,6 +436,6 @@ class MysqlDistributedProvider extends Provider
         if ($errno === 2006) {
             $this->disConnect();
         }
-        trigger_error($error . '(' . $errno . ')', E_USER_WARNING);
+        trigger_error($error . "(SQL errno: $errno), SQL: {$this->lastSql}", E_USER_WARNING);
     }
 }
