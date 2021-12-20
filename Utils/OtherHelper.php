@@ -196,7 +196,7 @@ class OtherHelper
                 $num = floor($num / 54) - 1;
                 $ret = $codes[$index] . $ret;
             }
-            $ret = $codes[(int)$num] . $ret;
+            $ret = $codes[(int)$num] . $ret; // Convert float to int
         }
 
         return $ret;
@@ -211,6 +211,7 @@ class OtherHelper
     public static function codeToNum($code)
     {
         $ret = null;
+
         if ($code) {
             $codes = "abcdefghjkmnpqrstuvwxyz23456789ABCDEFGHJKMNPQRSTUVWXYZ";
             $ret = 0;
@@ -219,9 +220,16 @@ class OtherHelper
                 $i--;
                 $char = $code[$j];
                 $pos = strpos($codes, $char);
+                if ($pos === false) {
+                    $ret = null;
+                    break;
+                }
                 $ret += (pow(54, $i) * ($pos + 1));
             }
-            $ret--;
+            if ($ret > 0) {
+                $ret--;
+                $ret &= PHP_INT_MAX;
+            }
         }
 
         return $ret;
