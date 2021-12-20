@@ -133,7 +133,7 @@ class ProcessManagerProvider extends Provider
         }
         $argc = count($argv);
         if ($argc > 0) {
-            $phpBinPath = Console::getCom()->config->app->phpBinPath;
+            $phpBinPath = envIniConfig('phpBinPath', 'console');
             if ($phpBinPath) {
                 Console::execCommand($phpBinPath, $argv, false, $result);
             }
