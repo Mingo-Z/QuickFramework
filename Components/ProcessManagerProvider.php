@@ -121,9 +121,9 @@ class ProcessManagerProvider extends Provider
     /**
      * 重启进程，向主进程发送SIGHUP信号
      *
-     * @param array $argv index 0 is command
+     * @param array $argv
      */
-    public static function restart(array $argv)
+    protected static function restart(array $argv)
     {
         $statusCode = 0;
         // close child processes
