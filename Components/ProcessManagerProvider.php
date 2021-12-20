@@ -1,6 +1,8 @@
 <?php
 namespace Qf\Components;
 
+use Qf\Console\Console;
+
 class ProcessManagerProvider extends Provider
 {
     protected static $workers = [];
@@ -71,6 +73,7 @@ class ProcessManagerProvider extends Provider
     public static function daemon($nochdir = false, $noclose = false)
     {
         global $STDIN, $STDOUT, $STDERR;
+
         $pid = pcntl_fork();
         if (!$pid) {
             $pid2 = pcntl_fork();
@@ -89,14 +92,23 @@ class ProcessManagerProvider extends Provider
                 }
                 self::installSignalHandle();
                 self::runWorkers();
+
+                // main process SIGHUP restart handler
+                pcntl_signal(SIGHUP, function ($signo) {
+                    self::restart($_SERVER['argv']);
+                });
+
                 while (1) {
                     $status = 0;
-                    $exitPid = pcntl_wait($status);
-                    $exitWorkerName = self::$workersPid[$exitPid];
-                    unset(self::$workersPid[$exitPid]);
-                    $exitWorker = self::$workers[$exitWorkerName];
-                    self::runWorker($exitWorker);
-                    time_nanosleep(0, 1000);
+                    $exitPid = pcntl_wait($status, WNOHANG);
+                    if ($exitPid > 0 && isset(self::$workersPid[$exitPid])) {
+                        $exitWorkerName = self::$workersPid[$exitPid];
+                        unset(self::$workersPid[$exitPid]);
+                        $exitWorker = self::$workers[$exitWorkerName];
+                        self::runWorker($exitWorker);
+                    }
+                    pcntl_signal_dispatch();
+                    Console::sleep(0.5);
                 }
             } else {
                 exit(0);
@@ -104,5 +116,28 @@ class ProcessManagerProvider extends Provider
         } else {
             exit(0);
         }
+    }
+
+    /**
+     * 重启进程，向主进程发送SIGHUP信号
+     *
+     * @param array $argv index 0 is command
+     */
+    public static function restart(array $argv)
+    {
+        $statusCode = 0;
+        // close child processes
+        foreach (self::$workersPid as $cPid => $cName) {
+            self::kill($cPid, SIGKILL);
+            pcntl_wait($statusCode);
+        }
+        $argc = count($argv);
+        if ($argc > 0) {
+            $phpBinPath = Console::getCom()->config->app->phpBinPath;
+            if ($phpBinPath) {
+                Console::execCommand($phpBinPath, $argv, false, $result);
+            }
+        }
+        exit($statusCode);
     }
 }

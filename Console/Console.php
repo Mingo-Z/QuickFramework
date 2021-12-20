@@ -58,7 +58,7 @@ class Console extends Application
      */
     public static function execCommand($command, $arguments = null, $isBackground = false, array &$result = null)
     {
-        $resultCode = 1;
+        $statusCode = 1;
         $cmdline = null;
 
         if ($command) {
@@ -76,10 +76,13 @@ class Console extends Application
             if ($isBackground) {
                 $cmdline .= ' >/dev/null &';
             }
-            exec($cmdline, $result, $resultCode);
+            exec($cmdline, $result, $statusCode);
+            if ($statusCode !== 0) {
+                trigger_error("Failed to execute $cmdline", E_USER_ERROR);
+            }
         }
 
-        return $resultCode;
+        return $statusCode;
     }
 
     /**
