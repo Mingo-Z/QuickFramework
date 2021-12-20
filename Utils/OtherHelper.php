@@ -48,7 +48,7 @@ class OtherHelper
     }
 
     /**
-     * 大小单位转换
+     * 存储大小单位转换
      *
      * @param int $bytes
      * @param int $precision 保留精度
@@ -58,6 +58,7 @@ class OtherHelper
     {
         $sieDesc = false;
         $units = ['B', 'KB', 'MB', 'GB', 'TB', 'PB'];
+        $bytes = (int)$bytes;
         if ($bytes > 0) {
             $i = 5;
             while ($i >= 0) {
