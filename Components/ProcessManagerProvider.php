@@ -94,6 +94,9 @@ class ProcessManagerProvider extends Provider
                 self::runWorkers();
 
                 // main process SIGHUP restart handler
+                if (self::isSupportAsyncSignal()) {
+                    pcntl_async_signals(true);
+                }
                 pcntl_signal(SIGHUP, function ($signo) {
                     self::restart($_SERVER['argv']);
                 });
@@ -107,8 +110,10 @@ class ProcessManagerProvider extends Provider
                         $exitWorker = self::$workers[$exitWorkerName];
                         self::runWorker($exitWorker);
                     }
-                    pcntl_signal_dispatch();
-                    Console::sleep(0.5);
+                    if (!self::isSupportAsyncSignal()) {
+                        pcntl_signal_dispatch();
+                    }
+                    Console::sleep(0.05);
                 }
             } else {
                 exit(0);

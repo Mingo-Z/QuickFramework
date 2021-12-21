@@ -3,6 +3,7 @@ namespace Qf\Queue\Jobs;
 
 use Qf\Components\IdGeneratorProvider;
 use Qf\Components\ProcessManagerProvider;
+use Qf\Console\Console;
 use Qf\Kernel\Exception;
 use Qf\Kernel\ExceptionErrorHandle;
 
@@ -47,12 +48,14 @@ class JobManager
                 $taskJob = $job->take();
                 if ($taskJob) {
                     $isPcntlAlarmTimeout = false;
-                    if ($taskJob->timeout > 0 && ProcessManagerProvider::isSupportAsyncSignal()) {
-                        pcntl_async_signals(true);
+                    if ($taskJob->timeout > 0) {
+                        if (ProcessManagerProvider::isSupportAsyncSignal()) {
+                            pcntl_async_signals(true);
+                        }
                         pcntl_signal(SIGALRM, function () use ($taskJob) {
                             ExceptionErrorHandle::exceptionHandle(new JobException("Job exceeded the maximum running time of {$taskJob->timeout} seconds",
                                 0, null, $taskJob));
-                            die();
+                            exit(1);
                         });
                         pcntl_alarm($taskJob->timeout);
                         $isPcntlAlarmTimeout = true;
@@ -66,7 +69,10 @@ class JobManager
                         pcntl_alarm(0);
                     }
                 } else {
-                    time_nanosleep(0, 1000);
+                    Console::sleep(0.05);
+                }
+                if (!ProcessManagerProvider::isSupportAsyncSignal()) {
+                    pcntl_signal_dispatch();
                 }
             }
         });
