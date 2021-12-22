@@ -240,10 +240,14 @@ class Command
             }
         }
 
-        if ($this->check()) {
+        if (isset($this->longShortOptionNameMap['help']) && isset($this->parsedOptionResults['h'])
+            && $this->parsedOptionResults['h'] === true) {
+            $this->usage();
+            exit();
+        } elseif ($this->check()) {
             Console::stderr("Command parameter error\n");
             $this->usage();
-            die();
+            exit();
         }
 
         return $this;

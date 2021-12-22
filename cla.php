@@ -17,22 +17,49 @@ foreach ($_SERVER['argv'] as $index => $option) {
     }
 }
 if (!$appRootPath || !is_dir($appRootPath)) {
-    exit("application root path does not exist");
+    exit("application root path does not exist, use -r|--root path");
 }
 require __DIR__ . '/Console/Console.php';
 $app = Console::getApp($appRootPath);
 
 $command = new Command();
 $command->setName('cla')
-    ->setOption('M', 'mode', true,
-    true, true, 'api|event|job', 'api', 'Choose running mode')
+    ->setOption('h', 'help', false,
+        false, false, null, null, 'Print usage information')
+    ->setOption('f', 'func', false,
+    true, true, 'api|event|job', 'api', 'Choose functional module')
     ->setOption('d', 'daemon', false,
-        false, false, null, null, 'Is run in daemon mode');
+        false, false, null, null, 'Is run in daemon mode for functional module event,job...')
+    ->setOption('l', 'list', false,
+        true, false, 'event|job', null, 'List all event or job');
 $command->parse($_SERVER['argv']);
-$isDaemon = $command->getOptionValue('d') ?? false;
-$runningMode= $command->getOptionValue('M') ?? 'api';
 
-switch ($runningMode) {
+$listAction = $command->getOptionValue('l');
+if (in_array($listAction, ['event', 'job'])) {
+    $message = '';
+    if ($listAction == 'event') {
+        $eventConfig = Console::getCom()->config->app->event->toArray();
+        if ($eventConfig) {
+            $eventListeners = $eventConfig['listeners'] ?? [];
+            foreach ($eventListeners as $event => $listeners) {
+                $message .= "Listeners for event $event:\n";
+                foreach ($listeners as $listener) {
+                    $message .= "\t$listener\n";
+                }
+            }
+        }
+    } else {
+        $message = "Worker jobs list:\n";
+        foreach (JobManager::listAppWorkerJobClasses() as $class) {
+            $message .= "\t$class\n";
+        }
+
+    }
+    Console::response($message);
+}
+
+$funcModule= $command->getOptionValue('M') ?? 'api';
+switch ($funcModule) {
     case 'event':
         ProcessManagerProvider::addWorker('eventLoop', function () {
             while (1) {
@@ -51,7 +78,8 @@ switch ($runningMode) {
         $app->execute();
 }
 
-if (in_array($runningMode, ['event', 'job'])) {
+if (in_array($funcModule, ['event', 'job'])) {
+    $isDaemon = $command->getOptionValue('d') ?? false;
     if ($isDaemon) {
         ProcessManagerProvider::daemon();
     } else {
