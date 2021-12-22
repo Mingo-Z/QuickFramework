@@ -1,3 +1,4 @@
+#!/usr/bin/env php
 <?php
 use Qf\Console\Console;
 use Qf\Console\Command;
