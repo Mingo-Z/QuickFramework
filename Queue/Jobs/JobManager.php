@@ -84,4 +84,30 @@ class JobManager
             $workerJob->release($workerJob->getDelay());
         }
     }
+
+    /**
+     * 列出应用Jobs目录所有的WorkerJob类
+     *
+     * @return array
+     */
+    public static function listAppWorkerJobClasses()
+    {
+        $classes = [];
+        $jobsDirPath = AppPath . 'Jobs/';
+        if (is_dir($jobsDirPath)) {
+            $dirHandler =  new \DirectoryIterator($jobsDirPath);
+            while ($dirHandler->valid()) {
+                $entry = $dirHandler->current();
+                if ($entry->isFile()) {
+                    $class = 'App\Jobs\\' . $entry->getBasename('.php');
+                    if (is_subclass_of($class, WorkerJob::class)) {
+                        $classes[] = $class;
+                    }
+                }
+                $dirHandler->next();
+            }
+        }
+
+        return $classes;
+    }
 }
