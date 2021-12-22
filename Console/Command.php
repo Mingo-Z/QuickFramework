@@ -138,6 +138,11 @@ class Command
         return $values;
     }
 
+    public function __get($name)
+    {
+        return $this->getOptionValue($name) ?? $this->getOptionValue($name, true);
+    }
+
     protected function check()
     {
         $errOptions = [];
