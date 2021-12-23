@@ -257,7 +257,7 @@ abstract class Model
         $total = 0;
         $condition = self::parseCondRule($rule);
         if ($condition['where']) {
-            $sql = "SELECT COUNT(*) as total FROM " . $this->dbConnection->getTable($this->tablePrimaryKey) . " WHERE {$condition['where']}";
+            $sql = "SELECT COUNT(*) as total FROM " . $this->dbConnection->getTable($this->tableKey) . " WHERE {$condition['where']}";
             $ret = $this->dbConnection->fetchAssoc($sql);
             $total = $ret['total'];
         }
