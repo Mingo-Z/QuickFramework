@@ -53,8 +53,7 @@ if (in_array($listAction, ['event', 'job'])) {
         }
     } else {
         $message = "Worker jobs list:\n";
-        $workerJobsConfigObj = Console::getCom()->config->app->workerJobs;
-        $enableWorkerJobs = $workerJobsConfigObj ? $workerJobsConfigObj->toArray() : [];
+        $enableWorkerJobs = JobManager::listAppWorkerJobClasses(true);
         foreach (JobManager::listAppWorkerJobClasses() as $class) {
             $statusDesc = in_array($class, $enableWorkerJobs) ? ' [enable]' : '';
             $message .= "\t$class{$statusDesc}\n";

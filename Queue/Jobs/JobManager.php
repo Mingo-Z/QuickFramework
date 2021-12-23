@@ -4,6 +4,7 @@ namespace Qf\Queue\Jobs;
 use Qf\Components\IdGeneratorProvider;
 use Qf\Components\ProcessManagerProvider;
 use Qf\Console\Console;
+use Qf\Kernel\Application;
 use Qf\Kernel\Exception;
 use Qf\Kernel\ExceptionErrorHandle;
 
@@ -86,25 +87,33 @@ class JobManager
     }
 
     /**
-     * 列出应用Jobs目录所有的WorkerJob类
+     * 列出应用Jobs目录或配置启用的WorkerJob类
      *
+     * @param false $isEnabled 是否配置启用
      * @return array
      */
-    public static function listAppWorkerJobClasses()
+    public static function listAppWorkerJobClasses($isEnabled = false)
     {
         $classes = [];
-        $jobsDirPath = AppPath . 'Jobs/';
-        if (is_dir($jobsDirPath)) {
-            $dirHandler =  new \DirectoryIterator($jobsDirPath);
-            while ($dirHandler->valid()) {
-                $entry = $dirHandler->current();
-                if ($entry->isFile()) {
-                    $class = 'App\Jobs\\' . $entry->getBasename('.php');
-                    if (is_subclass_of($class, WorkerJob::class)) {
-                        $classes[] = $class;
+        if ($isEnabled) {
+            $workerJobsConfigObj = Application::getCom()->config->app->workerJobs;
+            if ($workerJobsConfigObj) {
+                $classes = $workerJobsConfigObj->toArray();
+            }
+        } else {
+            $jobsDirPath = AppPath . 'Jobs/';
+            if (is_dir($jobsDirPath)) {
+                $dirHandler = new \DirectoryIterator($jobsDirPath);
+                while ($dirHandler->valid()) {
+                    $entry = $dirHandler->current();
+                    if ($entry->isFile()) {
+                        $class = 'App\Jobs\\' . $entry->getBasename('.php');
+                        if (is_subclass_of($class, WorkerJob::class)) {
+                            $classes[] = $class;
+                        }
                     }
+                    $dirHandler->next();
                 }
-                $dirHandler->next();
             }
         }
 
