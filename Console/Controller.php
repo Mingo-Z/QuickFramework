@@ -38,6 +38,6 @@ class Controller extends HttpController
             }
         }
         $command->parse($this->app->request->getArgv());
-        parent::__call($method, [$command->getOptionValues()]);
+        return parent::__call($method, [$command->getOptionValues()]);
     }
 }
