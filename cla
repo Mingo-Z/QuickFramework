@@ -12,13 +12,14 @@ if (($mode = php_sapi_name()) != 'cli') {
 $appRootPath = null;
 foreach ($_SERVER['argv'] as $index => $option) {
     $nextOption = $_SERVER['argv'][$index + 1] ?? null;
-    if (($option == '-r' || $option == '--root') && $nextOption && $nextOption[0] != '-') {
-        $appRootPath = $nextOption;
+    if (($option == '-r' || $option == '--root') && $nextOption && $nextOption[0] == '/') {
+        $appRootPath = realpath($nextOption);
         break;
     }
 }
+
 if (!$appRootPath || !is_dir($appRootPath)) {
-    exit("application root path does not exist, use -r|--root path");
+    exit("application root path does not exist, use -r|--root must is '/' start absolute path, otherwise, unpredictable problems will occur");
 }
 require __DIR__ . '/Console/Console.php';
 $app = Console::getApp($appRootPath);
@@ -59,7 +60,7 @@ if (in_array($listAction, ['event', 'job'])) {
     Console::response($message);
 }
 
-$funcModule= $command->getOptionValue('M') ?? 'api';
+$funcModule= $command->getOptionValue('f') ?? 'api';
 switch ($funcModule) {
     case 'event':
         ProcessManagerProvider::addWorker('eventLoop', function () {

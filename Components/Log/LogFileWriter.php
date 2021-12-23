@@ -6,7 +6,7 @@ class LogFileWriter extends LogWriter
     protected $options = [
         'fileMaxSize' => 1024 * 1024 * 100,
         'fileRotateNum' => 10,
-        'storagePath' => './logs/',
+        'storagePath' => AppPath . 'logs/',
         'fileSuffix' => '.log',
         'filePrefix' => '',
     ];
