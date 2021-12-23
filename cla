@@ -40,8 +40,9 @@ $listAction = $command->getOptionValue('l');
 if (in_array($listAction, ['event', 'job'])) {
     $message = '';
     if ($listAction == 'event') {
-        $eventConfig = Console::getCom()->config->app->event->toArray();
-        if ($eventConfig) {
+        $eventConfigObj = Console::getCom()->config->app->event;
+        if ($eventConfigObj) {
+            $eventConfig = $eventConfigObj->toArray();
             $eventListeners = $eventConfig['listeners'] ?? [];
             foreach ($eventListeners as $event => $listeners) {
                 $message .= "Listeners for event $event:\n";
@@ -52,8 +53,11 @@ if (in_array($listAction, ['event', 'job'])) {
         }
     } else {
         $message = "Worker jobs list:\n";
+        $workerJobsConfigObj = Console::getCom()->config->app->workerJobs;
+        $enableWorkerJobs = $workerJobsConfigObj ? $workerJobsConfigObj->toArray() : [];
         foreach (JobManager::listAppWorkerJobClasses() as $class) {
-            $message .= "\t$class\n";
+            $statusDesc = in_array($class, $enableWorkerJobs) ? ' [enable]' : '';
+            $message .= "\t$class{$statusDesc}\n";
         }
 
     }
