@@ -77,18 +77,22 @@ class FileHelper
     /**
      * 获取图片文件格式
      *
-     * @param string $content 文件二进制数据
+     * @param string $content 文件二进制数据，头部数据，不少于32Bytes
      * @return string|null 扩展名
      */
     public static function getImageFileExtension($content)
     {
         $extension = null;
         $mimeTypeHeaderCodes = [
-            'jpeg' => "\xff\xd8\xff\xe1",
+//            'jpeg' => "\xff\xd8\xff\xe1",
             'jpg' => "\xff\xd8\xff\xe1",
             'png' => "\x89\x50\x4e\x47",
             'tif' => "\x49\x49\x2a\x00",
             'bmp' => "\x42\x4d\x88\xa7",
+            'gif' => 'GIF',
+            'webp' => 'WEBP',
+            'ico' => "\x00\x00\x01\x00",
+            'psd' => '8BPS',
         ];
         if (strlen($content) >= 4) {
             foreach ($mimeTypeHeaderCodes as $key => $code) {
