@@ -47,7 +47,7 @@ abstract class Facade
         return $instance->$name;
     }
 
-    public static function __callStatic($method, $args)
+    public static function __callStatic($method, array $arguments)
     {
         $instance = static::getFacadeRoot();
         if (!$instance) {
@@ -56,6 +56,6 @@ abstract class Facade
             throw new Exception(get_class($instance) . "->$method method not defined");
         }*/
 
-        return $instance->$method(...$args);
+        return $instance->$method(...$arguments);
     }
 }

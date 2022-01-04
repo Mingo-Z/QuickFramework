@@ -48,14 +48,14 @@ class LogManager
         $this->logger->setOptions($this->options);
     }
 
-    public function __call($method, $arguments)
+    public function __call($method, array $arguments)
     {
         $writeLen = 0;
 
         if (isset(self::$levelMapMethods[$method])) {
             $level = self::$levelMapMethods[$method];
             if ($level >= $this->runLogLevel) {
-                $message = $arguments[0];
+                $message = $arguments[0] ?? '';
                 $writeLen = $this->log($method, $message);
             }
         }
@@ -65,6 +65,9 @@ class LogManager
 
     protected function log($levelStr, $message)
     {
+        if (!is_scalar($message)) {
+            $message = json_encode($message);
+        }
         $logMsg = sprintf("[%s][%s][%s][%d] \t%s\n", date('r'),
             defined('AppName') ? AppName : 'unknown', $levelStr, posix_getpid(), $message);
         return $this->logger->write($logMsg);
