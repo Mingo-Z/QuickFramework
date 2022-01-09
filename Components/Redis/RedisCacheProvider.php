@@ -240,4 +240,61 @@ class RedisCacheProvider extends Provider
 
         return $retValue;
     }
+
+    /**
+     * 设置指定键名的位值
+     *
+     * @param string $key
+     * @param int $offset
+     * @param int $value is 0 or 1
+     * @return int 原来的位值
+     * @throws \Qf\Kernel\Exception
+     */
+    public function setBit($key, $offset, $value)
+    {
+        $retValue = 0;
+        if ($this->isConnected()) {
+            $retValue = $this->connection->setbit($this->realKey($key), (int)$offset, (int)$value);
+            $this->checkError();;
+        }
+
+        return $retValue;
+    }
+
+    /**
+     * 获取指定键名的位值
+     *
+     * @param string $key
+     * @param int $offset
+     * @return int is 0 or 1
+     * @throws \Qf\Kernel\Exception
+     */
+    public function getBit($key, $offset)
+    {
+        $retValue = 0;
+        if ($this->isConnected()) {
+            $retValue = $this->connection->getbit($this->realKey($key), (int)$offset);
+            $this->checkError();;
+        }
+
+        return $retValue;
+    }
+
+    /**
+     * 获取指定键名位值等于1的数量
+     *
+     * @param string $key
+     * @return int
+     * @throws \Qf\Kernel\Exception
+     */
+    public function bitCount($key)
+    {
+        $retValue = 0;
+        if ($this->isConnected()) {
+            $retValue = $this->connection->bitcount($this->realKey($key));
+            $this->checkError();;
+        }
+
+        return $retValue;
+    }
 }
