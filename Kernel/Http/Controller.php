@@ -49,11 +49,21 @@ abstract class Controller
                 $this->$afterMethod();
             }
 
+            $this->finish();
+
             return $result;
         } else {
             throw new Exception('Controller ' . static::class. "::$methodName method does not exists", Exception::HTTP_STATUS_CODE_404);
         }
     }
 
+    /**
+     * Override this method to implement the controller end processing logic
+     *
+     * @return void
+     */
+    protected function finish()
+    {
 
+    }
 }
