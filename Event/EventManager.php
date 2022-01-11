@@ -55,8 +55,8 @@ class EventManager
                 $this->handleEvent($event);
             }
         } else {
-            while (($event = $this->syncEventQueue->pop())) {
-                $this->handleEvent($event);
+            while (!$this->syncEventQueue->isEmpty()) {
+                $this->handleEvent($this->syncEventQueue->dequeue());
             }
         }
     }
