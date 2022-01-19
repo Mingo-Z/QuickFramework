@@ -25,6 +25,7 @@ class LogManager
 
     protected static $drivers = [
         'file' => LogFileWriter::class,
+        'output' => LogOutputWriter::class,
     ];
 
     /**
@@ -45,7 +46,7 @@ class LogManager
         }
         $loggerClass = self::$drivers[$this->driverType];
         $this->logger = new $loggerClass;
-        $this->logger->setOptions($this->options);
+        $this->logger->setOptions($this->options ?? []);
     }
 
     public function __call($method, array $arguments)
