@@ -4,6 +4,7 @@ namespace Qf\Kernel\Database;
 use Qf\Kernel\Application;
 use Qf\Components\MysqlDistributedProvider;
 use Qf\Kernel\ComponentManager;
+use Qf\Kernel\Exception;
 
 abstract class Model
 {
@@ -13,11 +14,11 @@ abstract class Model
      */
     protected $dbConnection;
 
-    protected $tablePrimaryKey = 'id';
+    protected $tablePrimaryKey;
 
-    protected $tableColumnsName;
+    protected $tableColumnsName = [];
 
-    protected $tableColumnsDef;
+    protected $tableColumnsDef = [];
 
     protected $enableCache = false;
 
@@ -50,18 +51,18 @@ abstract class Model
             $sql = "SHOW COLUMNS FROM $tableName";
             foreach ($this->dbConnection->fetchAllAssoc($sql) as $row) {
                 $this->tableColumnsDef[$row['Field']] = $row;
-                if (!$this->tablePrimaryKey && $row['Key'] == 'PRI') {
-                    $this->tablePrimaryKey = $row['Field'];
-                }
             }
             if ($this->enableCache && $this->tableColumnsDef) {
                 $this->setCache($cacheTableDdlKey, $this->tableColumnsDef);
             }
         }
         if ($this->tableColumnsDef) {
-            $this->tableColumnsName = array_keys($this->tableColumnsDef);
-            foreach ($this->tableColumnsName as $columnName) {
+            foreach ($this->tableColumnsDef as $columnName => $columnDef) {
+                $this->tableColumnsName[] = $columnName;
                 $this->{$columnName} = null;
+                if (!$this->tablePrimaryKey && $columnDef['Key'] == 'PRI') {
+                        $this->tablePrimaryKey = $columnName;
+                }
             }
         }
     }
@@ -152,6 +153,9 @@ abstract class Model
 
     public function get($id)
     {
+        if (!$this->tablePrimaryKey) {
+            throw new Exception('Table primary key is missing');
+        }
         $rule = [
             'query' => "{$this->tablePrimaryKey} = '$id'",
         ];
