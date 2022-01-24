@@ -159,8 +159,8 @@ abstract class Model
         $rule = [
             'query' => "{$this->tablePrimaryKey} = '$id'",
         ];
-        $row = [];
-        if (!$this->enableCache || ($this->enableCache && !$row = $this->getCache($rule))) {
+        $row = null;
+        if (!$this->enableCache || ($this->enableCache && !($row = $this->getCache($rule)))) {
             $row = $this->fetchAssoc($rule);
             if ($row && $this->enableCache) {
                 $this->setCache($rule, $row);
