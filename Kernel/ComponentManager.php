@@ -55,7 +55,9 @@ class ComponentManager
             $comObj->setComponentManager($this);
             if (isset($comConfig['initProperties']) && $comConfig['initProperties']) {
                 foreach ($comConfig['initProperties'] as $key => $value) {
-                    $comObj->$key = $value;
+                    if (property_exists($comObj, $key)) {
+                        $comObj->$key = $value;
+                    }
                 }
             }
             if (method_exists($comObj, 'init')) {
