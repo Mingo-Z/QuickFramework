@@ -4,7 +4,7 @@ namespace Qf\Components\Facades;
 use Qf\Components\Redis\RedisCounterProvider;
 
 /**
- * Class Cache
+ * Class Counter
  * @package Qf\Components\Facades
  *
  * @method static int incr($increment = 1)
