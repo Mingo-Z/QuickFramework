@@ -21,7 +21,7 @@ return array_merge([
             'className' => Qf\Components\Redis\RedisCacheProvider::class,
             'initProperties' => [
                 'configFile' => AppConfigsPath . 'servers/redis.config.php',
-                'timeout' => 3,
+                'connectTimeout' => 3,
                 'name' => '',
             ]
         ],
