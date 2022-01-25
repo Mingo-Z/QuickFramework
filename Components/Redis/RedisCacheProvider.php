@@ -39,6 +39,15 @@ class RedisCacheProvider extends Provider
     	return $ret;
     }
 
+    /**
+     * 订阅
+     *
+     * @param array $channels
+     * @param callable $callback the callback function receives 3 parameters: the redis instance,
+     * the channel name, and the message. return value: mixed. any non-null return value in the callback will be returned to the caller.
+     * @return mixed
+     * @throws \Qf\Kernel\Exception
+     */
     public function subscribe(array $channels, callable $callback)
     {
         $ret = false;
