@@ -19,7 +19,7 @@ foreach ($_SERVER['argv'] as $index => $option) {
 }
 
 if (!$appRootPath || !is_dir($appRootPath)) {
-    exit("application root path does not exist, use -r|--root must be an absolute path without dot, otherwise, unpredictable problems will occur");
+    exit("application root path does not exist, use -r|--root must be an absolute path without dot, otherwise, unpredictable problems will occur\n");
 }
 require __DIR__ . '/Console/Console.php';
 $app = Console::getApp($appRootPath);
