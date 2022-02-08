@@ -95,7 +95,7 @@ abstract class Model
 
         $condition = self::parseCondRule($rule);
         if (isset($condition['where'])) {
-            if ($this->updatedAtFieldName && in_array($this->updatedAtFieldName, $this->tableColumnsName)) {
+            if ($this->isFieldInTable($this->updatedAtFieldName)) {
                 $columns[$this->updatedAtFieldName] = time();
             }
             $tableName = $this->dbConnection->getTable($this->tableKey);
@@ -108,10 +108,10 @@ abstract class Model
     public function insert(array $columns)
     {
         $ret = false;
-        if ($this->createdAtFieldName && in_array($this->createdAtFieldName, $this->tableColumnsName)) {
+        if ($this->isFieldInTable($this->createdAtFieldName)) {
             $columns[$this->createdAtFieldName] = time();
         }
-        if ($this->updatedAtFieldName && in_array($this->updatedAtFieldName, $this->tableColumnsName)) {
+        if ($this->isFieldInTable($this->updatedAtFieldName)) {
             $columns[$this->updatedAtFieldName] = time();
         }
         $tableName = $this->dbConnection->getTable($this->tableKey);
@@ -268,4 +268,31 @@ abstract class Model
 
         return $total;
     }
+
+    /**
+     * 逻辑删除/恢复表记录，deleted字段必须存在并且是整型
+     *
+     * @param array $rule 条件
+     * @param bool $isDelete 删除或者恢复
+     * @return bool
+     * @throws Exception
+     */
+    public function markOrUnMarkDeleted(array $rule, $isDelete = true)
+    {
+        if (!$this->isFieldInTable('deleted')) {
+            throw new Exception("Table {$this->tableKey} don't exist deleted field");
+        }
+        $columns = [
+            'deleted' => $isDelete ? 1 : 0,
+        ];
+
+        return $this->update($columns, $rule);
+    }
+
+    protected function isFieldInTable($fieldName)
+    {
+        return $fieldName && in_array($fieldName, $this->tableColumnsName);
+    }
 }
+
+
