@@ -40,6 +40,69 @@ class RedisCacheProvider extends Provider
     }
 
     /**
+     * 获取全表记录
+     *
+     * @param string $key
+     * @return array
+     * @throws \Qf\Kernel\Exception
+     */
+    public function getAllHashTable($key)
+    {
+        $list = [];
+
+        if ($this->isConnected()) {
+            $resp = $this->connection->hGetAll($this->realKey($key));
+            $this->checkError();
+            if (is_array($resp)) {
+                foreach ($resp as $key => $value) {
+                    $list[$key] = $this->decode($value);
+                }
+            }
+        }
+
+        return $list;
+    }
+
+    /**
+     * 获取表记录数量
+     *
+     * @param string$key
+     * @return int
+     * @throws \Qf\Kernel\Exception
+     */
+    public function lenHashTable($key)
+    {
+        $len = 0;
+
+        if ($this->isConnected()) {
+            $len = $this->connection->hLen($this->realKey($key));
+            $this->checkError();
+        }
+
+        return $len;
+    }
+
+    /**
+     * 判断字段在表里是否存在
+     *
+     * @param string $key
+     * @param string $field
+     * @return bool
+     * @throws \Qf\Kernel\Exception
+     */
+    public function existsHashTable($key, $field)
+    {
+        $ret = false;
+
+        if ($this->isConnected()) {
+            $ret = $this->connection->hExists($this->realKey($key), $field);
+            $this->checkError();
+        }
+
+        return $ret;
+    }
+
+    /**
      * 订阅
      *
      * @param array $channels

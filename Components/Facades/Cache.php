@@ -13,6 +13,9 @@ namespace Qf\Components\Facades;
  * @method static bool setHashTable($key, $field, $value)
  * @method static bool delHashTable($key, $field)
  * @method static string getHashTable($key, $field)
+ * @method static int lenHashTable($key)
+ * @method static bool existsHashTable($key, $field)
+ * @method static array getAllHashTable($key)
  * @method static mixed evalLuaCode($code, $keysNum, ...$arguments)
  *
  * operation bit methods
