@@ -217,7 +217,7 @@ abstract class Model
             $tableName = $this->dbConnection->getTable($this->tableKey);
             $sql = 'SELECT ' . join(', ', $columns) . ' FROM ' . $tableName . ' WHERE ' . $condition['where'];
             if (isset($condition['order'])) {
-                $sql .= $condition['order'];
+                $sql .= ' ' . $condition['order'];
             }
             $sql .= ' LIMIT 1';
             $ret = $this->dbConnection->fetchAssoc($sql);
