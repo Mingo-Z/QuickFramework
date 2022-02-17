@@ -40,13 +40,13 @@ trait ConnectionTrait
         $this->disConnect();
     }
 
-    public function ping($isAutoConnect = false)
+    public function ping($isAutoCloseConnect = false)
     {
         $ret = false;
 
         if ($this->isConnected(false)) {
             $ret = $this->driverPing();
-            if (!$ret && $isAutoConnect) {
+            if (!$ret && $isAutoCloseConnect) {
                 $this->disConnect();
             }
         }
