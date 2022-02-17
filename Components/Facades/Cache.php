@@ -8,6 +8,7 @@ namespace Qf\Components\Facades;
  * @method static bool set($key, $value, $expire = null)
  * @method static mixed get($key)
  * @method static bool delete($key)
+ * @method static bool exists($key)
  *
  * RedisCacheProvider
  * @method static bool setHashTable($key, $field, $value)

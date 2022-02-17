@@ -240,6 +240,18 @@ class RedisCacheProvider extends Provider
     {
         return $this->deleteKey($key);
     }
+
+    /**
+     * 检查key是否存在
+     *
+     * @param string $key
+     * @return bool
+     * @throws \Qf\Kernel\Exception
+     */
+    public function exists($key)
+    {
+        return $this->existsKey($key);
+    }
     
     /**
      * 批量设置缓存

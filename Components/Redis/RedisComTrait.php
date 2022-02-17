@@ -121,8 +121,27 @@ trait RedisComTrait {
         $ret = false;
 
         $key = $this->realKey($cusName);
-        if ($key && $this->isConnected(false)) {
+        if ($key && $this->isConnected()) {
             $ret = $this->connection->delete($key);
+            $this->checkError();
+        }
+
+        return $ret;
+    }
+
+    /**
+     * 检查key是否存在
+     *
+     * @param string|null $cusName
+     * @return bool
+     * @throws Exception
+     */
+    public function existsKey($cusName = null)
+    {
+        $ret = false;
+        $realKey = $this->realKey($cusName);
+        if ($realKey && $this->isConnected()) {
+            $ret = $this->connection->exists($realKey);
             $this->checkError();
         }
 
