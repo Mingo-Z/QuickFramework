@@ -5,6 +5,8 @@ class HttpClient
 {
     const REQUEST_METHOD_POST = 'POST';
     const REQUEST_METHOD_GET = 'GET';
+    const REQUEST_METHOD_PUT = 'PUT';
+    const REQUEST_METHOD_DELETE = 'DELETE';
 
     /**
      * POST文件上传参数构造
@@ -63,6 +65,7 @@ class HttpClient
         curl_setopt($curlHandle, CURLOPT_TIMEOUT, (int)$timeout);
         curl_setopt($curlHandle, CURLOPT_RETURNTRANSFER, true);
         curl_setopt($curlHandle, CURLOPT_HEADER, false);
+        curl_setopt($curlHandle, CURLOPT_CUSTOMREQUEST, $method);
 
         if ($headers) {
             $httpHeaders = [];
@@ -72,7 +75,7 @@ class HttpClient
             curl_setopt($curlHandle, CURLOPT_HTTPHEADER, $httpHeaders);
         }
 
-        if ($method == self::REQUEST_METHOD_POST) {
+        if ($params) {
             curl_setopt($curlHandle, CURLOPT_POST, true);
             curl_setopt($curlHandle, CURLOPT_POSTFIELDS, $params); // If $params is an array, the Content-Type header will be set to multipart/form-data
         }
