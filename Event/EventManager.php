@@ -4,6 +4,7 @@ namespace Qf\Event;
 use Qf\Components\Facades\IdGenerator;
 use Qf\Kernel\Application;
 use Qf\Kernel\Exception;
+use Qf\Kernel\ObjectRegistry;
 use Qf\Kernel\ShutdownScheduler;
 
 class EventManager
@@ -65,7 +66,7 @@ class EventManager
     {
         $listeners = $event->getListeners();
         foreach ($listeners as $listenerName) {
-            $listener = new $listenerName(); // Extends Listener class
+            $listener = ObjectRegistry::get($listenerName); // Extends Listener class
             $listener->handle($event);
         }
     }
