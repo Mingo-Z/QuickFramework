@@ -6,7 +6,7 @@ namespace Qf\Kernel;
  */
 class ObjectRegistry
 {
-    protected static $objectTable;
+    protected static $objectTable = [];
 
     /**
      * 获取类的实例
@@ -57,7 +57,13 @@ class ObjectRegistry
     {
         $objectKey = self::getObjectKey($class, $arguments);
         if (isset(self::$objectTable[$objectKey])) {
-            self::$objectTable[$objectKey] = null;
+            unset(self::$objectTable[$objectKey]);
+        }
+    }
+
+    protected static function flushAll()
+    {
+        foreach (array_keys(self::$objectTable) as $objectKey) {
             unset(self::$objectTable[$objectKey]);
         }
     }
