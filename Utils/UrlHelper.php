@@ -16,10 +16,22 @@ class UrlHelper
         $refreshTime = (int)$refreshTime;
         if ($params) {
             $separator = (strpos($url, '?') !== false) ? '&' : '?';
-            $url = $separator . http_build_query($params);
+            $url .= $separator . self::buildQuery($params);
         }
 
         return "<meta http-equiv=\"refresh\" content=\"$refreshTime; url=$url\">";
+    }
+
+    /**
+     * 构造application/x-www-form-urlencoded格式参数
+     *
+     * @param array $params URL参数
+     * @param string $separator 参数分隔符
+     * @return string
+     */
+    public static function buildQuery(array $params, $separator = '&')
+    {
+        return http_build_query($params, '', $separator);
     }
 }
 
