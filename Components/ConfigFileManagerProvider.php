@@ -1,7 +1,7 @@
 <?php
 namespace Qf\Components;
 
-use Qf\Utils\FileHelper;
+use Qf\Kernel\Exception;
 
 /**
  * 配置文件管理器
@@ -63,6 +63,8 @@ class ConfigFileManagerProvider extends Provider
      */
     const CONFIG_FILE_TYPE_XML = 2;
 
+    const CONFIG_FILE_TYPE_INI = 3;
+
     /**
      * 配置管理器核心配置文件
      *
@@ -119,11 +121,14 @@ class ConfigFileManagerProvider extends Provider
     protected function retrieve($name)
     {
         $name = strtolower($name);
-        if (!isset($this->objects[$name]) && isset($this->configCoreArray[$name])) {
+        if (!isset($this->objects[$name]) && isset($this->configCoreArray[$name]) && is_array($this->configCoreArray[$name])) {
             $array = $this->configCoreArray[$name];
-            $configFilePath = isset($array['configFilePath']) ? $array['configFilePath'] : '';
+            $configFilePath = $array['configFilePath'] ?? null;
+            if (!$configFilePath || !is_file($configFilePath)) {
+                throw new Exception("$name configuration configFilePath item is missing or is not file");
+            }
             $type = isset($array['type']) ? (int)$array['type'] : 0;
-            $entries = [];
+            $entries = null;
             switch ($type) {
                 case self::CONFIG_FILE_TYPE_PHP_ARRAY:
                     $entries = $this->parsePhpArrayConfigFile($configFilePath);
@@ -131,19 +136,27 @@ class ConfigFileManagerProvider extends Provider
                 case self::CONFIG_FILE_TYPE_JSON:
                     $entries = $this->parseJsonConfigFile($configFilePath);
                     break;
+                case self::CONFIG_FILE_TYPE_INI:
+                    $entries = $this->parseIniConfigFile($configFilePath);
                 default:
             }
-            $object = new ConfigEntryProvider();
-            $object->init($entries);
-            $this->objects[$name] = $object;
+            if (is_array($entries)) {
+                $object = new ConfigEntryProvider();
+                $object->init($entries);
+                $this->objects[$name] = $object;
+            } else {
+                throw new Exception("$configFilePath file parsing failed, please check the file format");
+            }
         }
-        return isset($this->objects[$name]) ? $this->objects[$name] : null;
+
+        return $this->objects[$name] ?? null;
     }
 
     protected function parseJsonConfigFile($file)
     {
-        $entries = [];
-        if (is_readable($file) && ($fileContent = FileHelper::readLocalFileN($file))) {
+        $entries = null;
+        $fileContent = file_get_contents($file);
+        if ($fileContent) {
             $entries = json_decode($fileContent, true);
         }
 
@@ -154,11 +167,11 @@ class ConfigFileManagerProvider extends Provider
      * 解析PHP数组格式配置文件
      *
      * @param string $configFilePath 配置文件完整路径
-     * @return array
+     * @return array|null
      */
     protected function parsePhpArrayConfigFile($configFilePath)
     {
-        $entries = [];
+        $entries = null;
         if (is_readable($configFilePath)) {
             $ret = require $configFilePath; // return array();
             if ($ret && is_array($ret)) {
@@ -168,6 +181,16 @@ class ConfigFileManagerProvider extends Provider
         }
         return $entries;
     }
+
+    /**
+     * 解析ini格式文件
+     *
+     * @param string $file
+     * @return array|false
+     */
+    protected function parseIniConfigFile($file)
+    {
+        return parse_ini_file($file, true, INI_SCANNER_NORMAL);
+    }
 }
- 
- 
+
