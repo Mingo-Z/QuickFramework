@@ -5,19 +5,12 @@ use Qf\Kernel\Exception;
 
 class FileHelper
 {
-    protected static $loadedFiles = [];
-
     public static function includeFile($file)
     {
-        $file = realpath($file);
-        $fileId = md5($file);
-        if (!isset(self::$loadedFiles[$fileId])) {
-            if (is_file($file)) {
-                require_once $file;
-                self::$loadedFiles[$fileId] = $file;
-            } else {
-                throw new Exception("Include $file file does not exist");
-            }
+        if (is_file($file)) {
+            include $file;
+        } else {
+            throw new Exception("Include $file file does not exist");
         }
     }
 
