@@ -67,7 +67,7 @@ class LogManager
     protected function log($levelStr, $message)
     {
         if (!is_scalar($message)) {
-            $message = json_encode($message);
+            $message = json_encode($message, JSON_UNESCAPED_UNICODE);
         }
         $logMsg = sprintf("[%s][%s][%s][%d] \t%s\n", date('r'),
             defined('AppName') ? AppName : 'unknown', $levelStr, posix_getpid(), $message);
