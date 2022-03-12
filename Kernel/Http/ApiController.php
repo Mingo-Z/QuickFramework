@@ -39,6 +39,11 @@ abstract class ApiController extends Controller
         return $this;
     }
 
+    protected function getCode()
+    {
+        return $this->code;
+    }
+
     protected function getMessage()
     {
         $message = $this->message ?: ($this->internalErrorTable[$this->code]
@@ -50,12 +55,24 @@ abstract class ApiController extends Controller
         return $message;
     }
 
+    protected function getData()
+    {
+        return $this->data;
+    }
+
+    protected function setData($data)
+    {
+        $this->data = $data;
+
+        return $this;
+    }
+
     protected function getResponseJsonBody()
     {
         return [
-            'code' => $this->code,
+            'code' => $this->getCode(),
             'message' => $this->getMessage(),
-            'data' => $this->data,
+            'data' => $this->getData(),
             'timestamp' => getNowTimestampMs(),
         ];
     }
