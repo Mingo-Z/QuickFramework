@@ -57,20 +57,21 @@ class LogManager
             $level = self::$levelMapMethods[$method];
             if ($level >= $this->runLogLevel) {
                 $message = $arguments[0] ?? '';
-                $writeLen = $this->log($method, $message);
+                $prefix = $arguments[1] ?? '';
+                $writeLen = $this->log($method, $message, $prefix);
             }
         }
 
         return $writeLen;
     }
 
-    protected function log($levelStr, $message)
+    protected function log($levelStr, $message, $prefix = null)
     {
         if (!is_scalar($message)) {
             $message = json_encode($message, JSON_UNESCAPED_UNICODE);
         }
-        $logMsg = sprintf("[%s][%s][%s][%d] \t%s\n", date('r'),
-            defined('AppName') ? AppName : 'unknown', $levelStr, posix_getpid(), $message);
+        $logMsg = sprintf("[%s][%s][%s][%d][%s] \t%s\n", date('r'),
+            defined('AppName') ? AppName : 'unknown', $levelStr, posix_getpid(), $prefix, $message);
         return $this->logger->write($logMsg);
     }
 }
