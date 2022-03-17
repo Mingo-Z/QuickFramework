@@ -12,6 +12,13 @@ trait ConnectionTrait
      */
     public $connectTimeout;
 
+    /**
+     * 读取超时时间，单位：s
+     *
+     * @var int
+     */
+    public $readTimeout;
+
     abstract protected function connect();
 
     abstract protected function driverDisConnect();
@@ -53,4 +60,13 @@ trait ConnectionTrait
 
         return $ret;
     }
+
+    /**
+     * override the method
+     */
+    protected function setReadTimeout($connection, $seconds)
+    {
+
+    }
 }
+

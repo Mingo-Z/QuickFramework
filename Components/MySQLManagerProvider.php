@@ -24,6 +24,7 @@ class MySQLManagerProvider extends Provider
         $this->isConnected = false;
         $this->lastExecQueryTime = 0;
         $this->connectTimeout = 30;
+        $this->readTimeout = 1800;
         self::$queryTotalNum = 0;
     }
 
@@ -37,9 +38,11 @@ class MySQLManagerProvider extends Provider
             $password = isset($password) ? $password : '';
             $charset = isset($charset) ? $charset : 'utf8';
             $dbname = isset($dbname) ? $dbname : null;
-            $connectTimeout = isset($timeout) ? (int)$timeout : $this->connectTimeout;
+            $connectTimeout = isset($connectTimeout) ? (int)$connectTimeout : $this->connectTimeout;
+            $readTimeout = $readTimeout ?? $this->readTimeout;
             $connection = mysqli_init();
             $connection->options(MYSQLI_OPT_CONNECT_TIMEOUT, $connectTimeout);
+            $this->setReadTimeout($connection, $readTimeout);
             if ($connection->real_connect($host, $username, $password, $dbname, $port)) {
                 $this->connection = $connection;
                 $this->isConnected = true;
@@ -222,4 +225,14 @@ class MySQLManagerProvider extends Provider
 
         return $isOk;
     }
+
+    protected function setReadTimeout(\mysqli $connection, $seconds)
+    {
+        $seconds = (int)$seconds;
+        if (!defined('MYSQLI_OPT_READ_TIMEOUT')) {
+            define('MYSQLI_OPT_READ_TIMEOUT', 11);
+        }
+        return $connection->options(MYSQLI_OPT_READ_TIMEOUT, $seconds);
+    }
 }
+

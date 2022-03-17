@@ -66,6 +66,7 @@ class MysqlDistributedProvider extends Provider
         $this->connectionId = 'default';
         $this->activedConnections = [];
         $this->connectTimeout = 30;
+        $this->readTimeout = 1800;
         $this->queryTimes = 0;
     }
     
@@ -78,9 +79,11 @@ class MysqlDistributedProvider extends Provider
             require $this->dbConfigFile;
             $port = isset($port) ? (int)$port : 3306;
             $charset = isset($charset) ? $charset : 'utf8';
-            $connectTimeout = isset($timeout) ? (int)$timeout : $this->connectTimeout;
+            $connectTimeout = isset($connectTimeout) ? (int)$connectTimeout : $this->connectTimeout;
+            $readTimeout = $readTimeout ?? $this->readTimeout;
             $this->connection = mysqli_init();
             $this->connection->options(MYSQLI_OPT_CONNECT_TIMEOUT, $connectTimeout);
+            $this->setReadTimeout($this->connection, $readTimeout);
             if ($this->connection->real_connect($host, $username, $password, $dbname, $port)) {
                 $this->connection->set_charset($charset);
                 $this->activedConnections[$this->connectionId] = $this->connection;
@@ -438,4 +441,14 @@ class MysqlDistributedProvider extends Provider
         }
         trigger_error($error . "(SQL errno: $errno), SQL: {$this->lastSql}", E_USER_WARNING);
     }
+
+    protected function setReadTimeout(\mysqli $connection, $seconds)
+    {
+        $seconds = (int)$seconds;
+        if (!defined('MYSQLI_OPT_READ_TIMEOUT')) {
+            define('MYSQLI_OPT_READ_TIMEOUT', 11);
+        }
+        return $connection->options(MYSQLI_OPT_READ_TIMEOUT, $seconds);
+    }
 }
+
