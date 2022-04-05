@@ -382,3 +382,4 @@ class RedisCacheProvider extends Provider
         return $retValue;
     }
 }
+

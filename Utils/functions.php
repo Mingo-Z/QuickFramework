@@ -417,7 +417,7 @@ function parseConds(array $rule)
     }
     if (isset($rule['limit']) && is_array($rule['limit']) 
         && count($rule['limit']) == 2) {
-        $result['limit'] = 'LIMIT ' . $rule['limit'][0] . ', ' . $rule['limit'][1];
+        $result['limit'] = 'LIMIT ' . (int)$rule['limit'][0] . ', ' . (int)$rule['limit'][1];
     }
     $orders = array();
     if (isset($rule['order']) && is_array($rule['order'])) {

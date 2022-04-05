@@ -35,6 +35,9 @@ abstract class Model
         if (!$com) {
             $com = Application::getCom();
         }
+        if (!$this->tableKey) {
+            throw new Exception('Database model class tableKey property not setting');
+        }
         $this->com = $com;
         $this->dbConnection = $this->com->database;
         $this->loadTableColumns();
@@ -47,7 +50,7 @@ abstract class Model
             $this->tableColumnsDef = $this->getCache($cacheTableDdlKey, []);
         }
         if (!$this->tableColumnsDef && $this->tableKey && $this->dbConnection) {
-            $tableName = $this->dbConnection->getTable($this->tableKey);
+            $tableName = $this->getTable();
             $sql = "SHOW COLUMNS FROM $tableName";
             foreach ($this->dbConnection->fetchAllAssoc($sql) as $row) {
                 $this->tableColumnsDef[$row['Field']] = $row;
@@ -98,8 +101,7 @@ abstract class Model
             if ($this->isFieldInTable($this->updatedAtFieldName)) {
                 $columns[$this->updatedAtFieldName] = time();
             }
-            $tableName = $this->dbConnection->getTable($this->tableKey);
-            $ret = $this->dbConnection->update($tableName, $columns, $condition['where']);
+            $ret = $this->dbConnection->update($this->getTable(), $columns, $condition['where']);
         }
 
         return $ret;
@@ -114,8 +116,7 @@ abstract class Model
         if ($this->isFieldInTable($this->updatedAtFieldName)) {
             $columns[$this->updatedAtFieldName] = time();
         }
-        $tableName = $this->dbConnection->getTable($this->tableKey);
-        if ($this->dbConnection->insert($tableName, $columns)) {
+        if ($this->dbConnection->insert($this->getTable(), $columns)) {
             $ret = $this->dbConnection->getLastAutoInsertId();
         }
 
@@ -128,8 +129,7 @@ abstract class Model
 
         $condition = self::parseCondRule($rule);
         if (isset($condition['where'])) {
-            $tableName = $this->dbConnection->getTable($this->tableKey);
-            $ret = $this->dbConnection->delete($tableName, $condition['where']);
+            $ret = $this->dbConnection->delete($this->getTable(), $condition['where']);
         }
 
         return $ret;
@@ -214,8 +214,7 @@ abstract class Model
 
         $condition = self::parseCondRule($rule);
         if (isset($condition['where'])) {
-            $tableName = $this->dbConnection->getTable($this->tableKey);
-            $sql = 'SELECT ' . join(', ', $columns) . ' FROM ' . $tableName . ' WHERE ' . $condition['where'];
+            $sql = 'SELECT ' . join(', ', $columns) . ' FROM ' . $this->getTable() . ' WHERE ' . $condition['where'];
             if (isset($condition['order'])) {
                 $sql .= ' ' . $condition['order'];
             }
@@ -237,8 +236,7 @@ abstract class Model
 
         $condition = self::parseCondRule($rule);
         if (isset($condition['where'])) {
-            $tableName = $this->dbConnection->getTable($this->tableKey);
-            $sql = 'SELECT ' . join(', ', $columns) . ' FROM ' . $tableName . ' WHERE ' . $condition['where'];
+            $sql = 'SELECT ' . join(', ', $columns) . ' FROM ' . $this->getTable() . ' WHERE ' . $condition['where'];
             if (isset($condition['order'])) {
                 $sql .= ' ' .$condition['order'];
             }
@@ -261,7 +259,7 @@ abstract class Model
         $total = 0;
         $condition = self::parseCondRule($rule);
         if ($condition['where']) {
-            $sql = "SELECT COUNT(*) as total FROM " . $this->dbConnection->getTable($this->tableKey) . " WHERE {$condition['where']}";
+            $sql = "SELECT COUNT(*) as total FROM " . $this->getTable() . " WHERE {$condition['where']}";
             $ret = $this->dbConnection->fetchAssoc($sql);
             $total = $ret['total'];
         }
@@ -292,6 +290,16 @@ abstract class Model
     protected function isFieldInTable($fieldName)
     {
         return $fieldName && in_array($fieldName, $this->tableColumnsName);
+    }
+
+    /**
+     * 通过数据库配置键名获取真实表名并切换所在数据库
+     *
+     * @return string
+     */
+    public function getTable()
+    {
+        return $this->dbConnection->getTable($this->getTableKey());
     }
 }
 
