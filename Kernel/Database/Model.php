@@ -97,7 +97,7 @@ abstract class Model
         $ret = false;
 
         $condition = self::parseCondRule($rule);
-        if (isset($condition['where'])) {
+        if ($condition['where']) {
             if ($this->isFieldInTable($this->updatedAtFieldName)) {
                 $columns[$this->updatedAtFieldName] = time();
             }
@@ -128,7 +128,7 @@ abstract class Model
         $ret = false;
 
         $condition = self::parseCondRule($rule);
-        if (isset($condition['where'])) {
+        if ($condition['where']) {
             $ret = $this->dbConnection->delete($this->getTable(), $condition['where']);
         }
 
@@ -213,7 +213,7 @@ abstract class Model
         $ret = false;
 
         $condition = self::parseCondRule($rule);
-        if (isset($condition['where'])) {
+        if ($condition['where']) {
             $sql = 'SELECT ' . join(', ', $columns) . ' FROM ' . $this->getTable() . ' WHERE ' . $condition['where'];
             if (isset($condition['order'])) {
                 $sql .= ' ' . $condition['order'];
@@ -235,7 +235,7 @@ abstract class Model
         $ret = false;
 
         $condition = self::parseCondRule($rule);
-        if (isset($condition['where'])) {
+        if ($condition['where']) {
             $sql = 'SELECT ' . join(', ', $columns) . ' FROM ' . $this->getTable() . ' WHERE ' . $condition['where'];
             if (isset($condition['order'])) {
                 $sql .= ' ' .$condition['order'];

@@ -358,7 +358,7 @@ function isPhpCommandMode()
 function parseConds(array $rule)
 {   
     $result = array(
-        'where' => '1',
+        'where' => '',
         'order' => '',
         'limit' => ''
     );
@@ -375,7 +375,8 @@ function parseConds(array $rule)
         'scope' => "(%s BETWEEN '%s' AND '%s')",
         'like' => "%s LIKE '%s'"
     );
-    
+    $allWhereConditions = [];
+
     if (isset($rule['conds']) && is_array($rule['conds'])) {
         foreach ($rule['conds'] as $op => $define) {
             $format = isset($opFormats[$op]) ? $opFormats[$op] : '';
@@ -405,16 +406,20 @@ function parseConds(array $rule)
                         $conds[] = sprintf($format, $key, $value['min'], $value['max']);
                     }
                 }
-                if(!empty($conds)){
-                    $result['where'] .= ' AND (' . join(" $logicOp ", $conds) . ')';
+                if($conds){
+                    $allWhereConditions[] = '(' . join(" $logicOp ", $conds) . ')';
                 }
             }
 
         }
     }
     if (isset($rule['query'])) {
-        $result['where'] .=  ' AND (' . $rule['query'] . ')';
+        $allWhereConditions[] =  '(' . $rule['query'] . ')';
     }
+    if ($allWhereConditions) {
+        $result['where'] = join(' AND ', $allWhereConditions);
+    }
+
     if (isset($rule['limit']) && is_array($rule['limit']) 
         && count($rule['limit']) == 2) {
         $result['limit'] = 'LIMIT ' . (int)$rule['limit'][0] . ', ' . (int)$rule['limit'][1];
