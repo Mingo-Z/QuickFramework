@@ -301,6 +301,15 @@ abstract class Model
     {
         return $this->dbConnection->getTable($this->getTableKey());
     }
-}
 
+    /**
+     * 得到更新操作影响行数
+     *
+     * @return int
+     */
+    public function getAffectedRows()
+    {
+        return $this->dbConnection->getAffectedRows();
+    }
+}
 
