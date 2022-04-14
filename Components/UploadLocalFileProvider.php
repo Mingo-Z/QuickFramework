@@ -127,7 +127,7 @@ class UploadLocalFileProvider extends Provider
             $index = 0;
             while ($index < $fileNum) {
                 foreach ($fields as $field) {
-                    $files[$index][$field] = $_FILES[$varName][$field][$index];
+                    $files[$index][$field] = $fileNum > 1 ? $_FILES[$varName][$field][$index] : $_FILES[$varName][$field];
                 }
                 $index++;
             }
@@ -158,3 +158,4 @@ class UploadLocalFileProvider extends Provider
         return $files;
     }
 }
+
