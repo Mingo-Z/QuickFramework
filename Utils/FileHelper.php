@@ -77,8 +77,8 @@ class FileHelper
     {
         $extension = null;
         $mimeTypeHeaderCodes = [
-//            'jpeg' => "\xff\xd8\xff\xe1",
-            'jpg' => "\xff\xd8\xff\xe1",
+//            'jpeg' => "\xff\xd8",
+            'jpg' => "\xff\xd8",
             'png' => "\x89\x50\x4e\x47",
             'tif' => "\x49\x49\x2a\x00",
             'bmp' => "\x42\x4d\x88\xa7",

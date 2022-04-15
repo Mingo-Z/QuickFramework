@@ -12,20 +12,23 @@ class UploadLocalFileProvider extends Provider
 
     const UPLOAD_ERR_OK = 0;
     const UPLOAD_ERR_NO_FILE = 1;
-    const UPLOAD_ERR_EXTENSION = 2;
+    const UPLOAD_ERR_ALLOW_NUM = 2;
     const UPLOAD_ERR_ALLOW_SIZE = 3;
-    const UPLOAD_ERR_ALLOW_NUM = 4;
-    const UPLOAD_ERR_CANT_STORAGE = 5;
+    const UPLOAD_ERR_EXTENSION = 4;
+    const UPLOAD_ERR_CANT_WRITE = 5;
+    const UPLOAD_ERR_PHP = 6;
+
 
     protected $errno = 0;
 
     protected static $errors = [
         self::UPLOAD_ERR_OK => 'Ok',
-        self::UPLOAD_ERR_NO_FILE => 'File does not exist',
-        self::UPLOAD_ERR_EXTENSION => 'File extension is not allowed',
-        self::UPLOAD_ERR_ALLOW_SIZE => 'File size exceeds limit',
+        self::UPLOAD_ERR_NO_FILE => 'No file was uploaded',
         self::UPLOAD_ERR_ALLOW_NUM => 'File num exceeds limit',
-        self::UPLOAD_ERR_CANT_STORAGE => 'File storage failed',
+        self::UPLOAD_ERR_ALLOW_SIZE => 'File size exceeds limit',
+        self::UPLOAD_ERR_EXTENSION => 'File upload stopped by extension',
+        self::UPLOAD_ERR_CANT_WRITE => 'File write failed',
+        self::UPLOAD_ERR_PHP => 'PHP error, please check php.ini configuration',
     ];
 
     protected function getFileStorageDirPath($fileBaseName, $nowTimestamp = null)
@@ -75,6 +78,11 @@ class UploadLocalFileProvider extends Provider
         return $this->errno;
     }
 
+    public function getError($errno)
+    {
+        return self::$errors[$errno] ?? '';
+    }
+
     /**
      * 存储上传文件
      *
@@ -94,16 +102,13 @@ class UploadLocalFileProvider extends Provider
                 mkdir($fileStorageDirPath, 0755, true);
             }
             $fileFullPath = $fileStorageDirPath . $fileBaseName . '.' . $file['extension'];
-            if (move_uploaded_file($file['tmp_name'], $fileFullPath)) {
+            if (rename($file['tmp_name'], $fileFullPath)) {
                 $file['storagePath'] = $fileFullPath;
                 $file['fileId'] = "$nowTimestamp|$fileBaseName";
                 $ret = true;
             } else {
-                $file['error'] = self::UPLOAD_ERR_CANT_STORAGE;
+                $file['error'] = self::UPLOAD_ERR_CANT_WRITE;
                 unlink($file['tmp_name']); // 删除临时文件
-            }
-            if (!$file['php_error'] && $file['error'] && isset(self::$errors[$file['error']])) {
-                $file['error'] = self::$errors[$file['error']];
             }
             unset($file['tmp_name']);
         }
@@ -113,12 +118,9 @@ class UploadLocalFileProvider extends Provider
 
     public function getFiles($varName)
     {
-        $fileNum = 0;
         $files = [];
         if (isset($_FILES[$varName])) {
-            if (isset($_FILES[$varName]['name'])) {
-                $fileNum = is_array($_FILES[$varName]['name']) ? count($_FILES[$varName]['name']) : 1;
-            }
+            $fileNum = is_array($_FILES[$varName]['name']) ? count($_FILES[$varName]['name']) : 1;
             if ($fileNum > $this->allowMaxFileNum) {
                 $this->errno = self::UPLOAD_ERR_ALLOW_NUM;
                 return $files;
@@ -131,12 +133,15 @@ class UploadLocalFileProvider extends Provider
                 }
                 $index++;
             }
+        } else {
+            $this->errno = self::UPLOAD_ERR_NO_FILE;
         }
         if ($files) {
             foreach ($files as &$file) {
                 $file['php_error'] = $file['error'];
                 if (!$file['error']) {
                     if ($file['size'] > $this->allowMaxFileSize) {
+                        $this->errno =
                         $file['error'] = self::UPLOAD_ERR_ALLOW_SIZE;
                     } else {
                         $extension = 'unknown';
@@ -152,6 +157,8 @@ class UploadLocalFileProvider extends Provider
                             $file['error'] = self::UPLOAD_ERR_EXTENSION;
                         }
                     }
+                } else {
+                    $file['error'] = self::UPLOAD_ERR_PHP;
                 }
             }
         }
