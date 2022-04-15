@@ -33,10 +33,10 @@ class UploadLocalFileProvider extends Provider
 
     protected function getFileStorageDirPath($fileBaseName, $nowTimestamp = null)
     {
-        $nowTimestamp = $nowTimestamp ?: time();
+        $nowTimestamp = $nowTimestamp ?? time();
         return sprintf('%s/%04d/%02d/%02d/%s/', $this->storageBaseDirPath,
             date('Y', $nowTimestamp), date('m', $nowTimestamp),
-            date('d', $nowTimestamp), substr($fileBaseName, 8, 2));
+            date('d', $nowTimestamp), substr(md5($fileBaseName), 8, 2));
     }
 
     protected static function getFileExtension($filename)
@@ -87,7 +87,7 @@ class UploadLocalFileProvider extends Provider
      * 存储上传文件
      *
      * @param array &$file UploadLocalFileProvider::getFiles返回数组的元素
-     * @param null $theFileBaseName
+     * @param string|null $theFileBaseName 指定保存文件名，不带扩展名
      * @return bool
      */
     public function saveFileToDisk(array &$file, $theFileBaseName = null)
@@ -95,7 +95,7 @@ class UploadLocalFileProvider extends Provider
         $ret = false;
         if (!$file['error'] && isset($file['tmp_name']) && is_file($file['tmp_name'])
             && isset($file['extension']) && $file['extension']) {
-            $fileBaseName = $theFileBaseName ?? self::getFileBaseName($file['tmp_name']);
+            $fileBaseName = $theFileBaseName ??  self::getFileBaseName($file['tmp_name']);
             $nowTimestamp = time();
             $fileStorageDirPath = $this->getFileStorageDirPath($fileBaseName, $nowTimestamp);
             if (!is_dir($fileStorageDirPath)) {
