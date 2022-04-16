@@ -17,6 +17,8 @@ class QueryRule extends Rule
         $actionName = $request->$actionKey;
 
         return [
+            'isMCA' => true,
+            'customPathHandler' => null,
             'moduleName' => $moduleName,
             'controllerName' => $controllerName,
             'actionName' => $actionName,

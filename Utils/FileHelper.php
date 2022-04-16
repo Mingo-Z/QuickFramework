@@ -99,3 +99,4 @@ class FileHelper
         return $extension;
     }
 }
+

@@ -16,26 +16,46 @@ class RewriteRule extends Rule
         if (($pos = strpos($requestUri, '?')) !== false) {
             $requestUri = substr($requestUri, 0, $pos);
         }
+        $origRequestUri = $requestUri;
         $requestUri = trim($requestUri, '/');
         $uriBasePath = envIniConfig('uriBasePath', 'http');
         if ($uriBasePath) {
             $requestUri = str_replace($uriBasePath, '', $requestUri);
         }
-        $requestUriArray = array_filter(explode('/', $requestUri));
+
         $moduleName = null;
-        if (count($requestUriArray) >= 3) {
-            $moduleName = isset($requestUriArray[0]) ? $requestUriArray[0] : null;
-            $controllerName = isset($requestUriArray[1]) ? $requestUriArray[1] : null;
-            $actionName = isset($requestUriArray[2]) ? $requestUriArray[2] : null;
+        $controllerName = null;
+        $actionName = null;
+        // 自定义路由规则
+        $isMCA = true;
+        $customPathHandler = null;
+        if (($config = self::getPathHandlerConfig($origRequestUri, false))) {
+            $isMCA = $config['isMCA'];
+            $handler = $config['handler'];
+            if ($isMCA) {
+                list($moduleName, $controllerName, $actionName) = $handler;
+            } else {
+                $customPathHandler = $handler;
+            }
         } else {
-            $controllerName = isset($requestUriArray[0]) ? $requestUriArray[0] : null;
-            $actionName = isset($requestUriArray[1]) ? $requestUriArray[1] : null;
+            $requestUriArray = array_filter(explode('/', $requestUri));
+            if (count($requestUriArray) >= 3) {
+                $moduleName = $requestUriArray[0] ?? null;
+                $controllerName = $requestUriArray[1] ?? null;
+                $actionName = $requestUriArray[2] ?? null;
+            } else {
+                $controllerName = $requestUriArray[0] ?? null;
+                $actionName = $requestUriArray[1] ?? null;
+            }
         }
 
         return [
+            'isMCA' => $isMCA,
+            'customPathHandler' => $customPathHandler,
             'moduleName' => $moduleName,
             'controllerName' => $controllerName,
             'actionName' => $actionName,
         ];
     }
 }
+

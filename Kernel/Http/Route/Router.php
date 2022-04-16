@@ -60,16 +60,26 @@ class Router
     {
         MiddlewareManager::triggerMiddleware(MiddlewareManager::TRIGGER_STAGE_HTTP_ROUTE);
 
+        // load custom route rules file
+        if (is_file(AppPath . 'route.php')) {
+            include AppPath . 'route.php';
+        }
+
         // http route
         $ruleName = envIniConfig('routeRuleName', 'http', 'Query');
         $ruleOptions = envIniConfig('ruleOptions', 'http');
         $rule = $this->getRuleClass($ruleName);
         $routeComponents = $rule::getRouteComponents($ruleOptions);
         $dispatcher = Dispatcher::getInstance();
-        $dispatcher->setModuleName($routeComponents['moduleName'])->setControllerName($routeComponents['controllerName'])
-            ->setActionName($routeComponents['actionName']);
+        if ($routeComponents['isMCA']) {
+            $dispatcher->setModuleName($routeComponents['moduleName'])->setControllerName($routeComponents['controllerName'])
+                ->setActionName($routeComponents['actionName']);
+        } else {
+            $dispatcher->setCustomPathHandler($routeComponents['customPathHandler']);
+        }
 
         return $dispatcher;
     }
 
 }
+

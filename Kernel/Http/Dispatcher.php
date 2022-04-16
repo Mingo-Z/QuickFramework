@@ -18,6 +18,14 @@ class Dispatcher
     protected $app;
     protected $isProcessed;
 
+    /**
+     * 是否是标准rewrite路由模式，非自定义模式
+     *
+     * @var bool
+     */
+    protected $isMCA = true;
+    protected $customPathHandler;
+
     private function __construct(array $options = null)
     {
         $this->defaultModuleName = envIniConfig('defaultModuleName', 'http');
@@ -26,6 +34,19 @@ class Dispatcher
         $this->options = $options;
         $this->app = Application::getApp();
         $this->isProcessed = true;
+    }
+
+    /**
+     * 自定义路由处理器
+     *
+     * @param callable $handler
+     */
+    public function setCustomPathHandler(callable $handler)
+    {
+        $this->customPathHandler = $handler;
+        $this->isMCA = false;
+
+        return $this;
     }
 
     /**
@@ -104,12 +125,14 @@ class Dispatcher
      */
     public function dispatch()
     {
-        $this->moduleName = $this->moduleName ?? $this->defaultModuleName;
-        $this->controllerName = $this->controllerName ?? $this->defaultControllerName;
-        $this->actionName = $this->actionName ?? $this->defaultActionName;
+        if ($this->isMCA) {
+            $this->moduleName = $this->moduleName ?? $this->defaultModuleName;
+            $this->controllerName = $this->controllerName ?? $this->defaultControllerName;
+            $this->actionName = $this->actionName ?? $this->defaultActionName;
 
-        if (!$this->controllerName || !$this->actionName) {
-            throw new Exception("Request uri: {$_SERVER['REQUEST_URI']} resource does not exist", Exception::HTTP_STATUS_CODE_404);
+            if (!$this->controllerName || !$this->actionName) {
+                throw new Exception("Request uri: {$_SERVER['REQUEST_URI']} resource does not exist", Exception::HTTP_STATUS_CODE_404);
+            }
         }
 
         MiddlewareManager::triggerMiddleware(MiddlewareManager::TRIGGER_STAGE_HTTP_DISPATCH, $this->moduleName);
@@ -120,16 +143,20 @@ class Dispatcher
     public function execute()
     {
         if ($this->isProcessed) {
-            $class = "Http\\{$this->controllerName}Controller";
-            if ($this->moduleName) {
-                $class = $this->moduleName . '\\' . $class;
+            if ($this->isMCA) {
+                $class = "Http\\{$this->controllerName}Controller";
+                if ($this->moduleName) {
+                    $class = $this->moduleName . '\\' . $class;
+                }
+                $class = 'App\\' . $class;
+                if (!class_exists($class, true) || !is_subclass_of($class, Controller::class)) {
+                    throw new Exception("Application controller $class class does not exists", Exception::HTTP_STATUS_CODE_404);
+                }
+                $controllerInstance = new $class($this->app);
+                $result = $controllerInstance->{$this->actionName}();
+            } else {
+                $result = call_user_func($this->customPathHandler, $this->app);
             }
-            $class = 'App\\' . $class;
-            if (!class_exists($class, true) || !is_subclass_of($class, Controller::class)) {
-                throw new Exception("Application controller $class class does not exists", Exception::HTTP_STATUS_CODE_404);
-            }
-            $controllerInstance = new $class($this->app);
-            $result = $controllerInstance->{$this->actionName}();
             $response = $this->app->response;
             $resIsResponseObj = false;
             if (!is_null($result)) {
@@ -156,3 +183,4 @@ class Dispatcher
         }
     }
 }
+

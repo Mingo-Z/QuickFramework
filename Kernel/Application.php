@@ -139,3 +139,4 @@ class Application
         return self::$com;
     }
 }
+
