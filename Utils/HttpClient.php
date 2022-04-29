@@ -66,6 +66,7 @@ class HttpClient
         curl_setopt($curlHandle, CURLOPT_RETURNTRANSFER, true);
         curl_setopt($curlHandle, CURLOPT_HEADER, false);
         curl_setopt($curlHandle, CURLOPT_CUSTOMREQUEST, $method);
+        curl_setopt($curlHandle, CURLOPT_FOLLOWLOCATION, true);
 
         if ($headers) {
             $httpHeaders = [];
