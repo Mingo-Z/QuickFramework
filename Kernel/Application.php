@@ -47,6 +47,8 @@ class Application
         self::$com = new ComponentManager();
         self::$com->configFile = FrameworkConfigsPath . 'components.config.php';
 
+        ExceptionErrorHandle::installHandle(isDebug());
+
         // vendor 第三方类库自动加载
         if (is_file(FrameworkVendorPath . 'autoload.php')) {
             FileHelper::includeFile(FrameworkVendorPath . 'autoload.php');
@@ -68,7 +70,6 @@ class Application
             date_default_timezone_set($timezone);
         }
 
-        ExceptionErrorHandle::installHandle(isDebug());
         ShutdownScheduler::init();
     }
 
