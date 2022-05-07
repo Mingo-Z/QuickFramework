@@ -381,5 +381,41 @@ class RedisCacheProvider extends Provider
 
         return $retValue;
     }
+
+    /**
+     * 查询指定key剩余有效时间，单位：秒
+     *
+     * @param string $key
+     * @return bool|int 剩余有效时间，key没有设置有效时间返回-1，key不存在返回-2
+     * @throws \Qf\Kernel\Exception
+     */
+    public function getTtl($key)
+    {
+        $retValue = false;
+        if ($this->isConnected()) {
+            $retValue = $this->connection->ttl($this->realKey($key));
+        }
+
+        return $retValue;
+    }
+
+    /**
+     * 设置key有效时间，单位：秒
+     *
+     * @param string $key
+     * @param int $seconds
+     * @return bool
+     * @throws \Qf\Kernel\Exception
+     */
+    public function setExpire($key, $seconds)
+    {
+        $retValue = false;
+        if ($this->isConnected()) {
+            $seconds = (int)$seconds;
+            $retValue = $this->connection->expire($this->realKey($key, $seconds));
+        }
+
+        return $retValue;
+    }
 }
 
