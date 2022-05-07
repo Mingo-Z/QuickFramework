@@ -11,6 +11,8 @@ namespace Qf\Components\Facades;
  * @method static bool exists($key)
  * @method static bool|int getTtl($key)
  * @method static bool setExpire($key, $seconds)
+ * @method static bool setExpireAt($key, $timestamp)
+
  *
  * RedisCacheProvider
  * @method static bool setHashTable($key, $field, $value)

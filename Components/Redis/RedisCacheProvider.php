@@ -412,7 +412,26 @@ class RedisCacheProvider extends Provider
         $retValue = false;
         if ($this->isConnected()) {
             $seconds = (int)$seconds;
-            $retValue = $this->connection->expire($this->realKey($key, $seconds));
+            $retValue = $this->connection->expire($this->realKey($key), $seconds);
+        }
+
+        return $retValue;
+    }
+
+    /**
+     * 设置key到期时间戳，单位：秒
+     *
+     * @param string $key
+     * @param int $timestamp
+     * @return bool
+     * @throws \Qf\Kernel\Exception
+     */
+    public function setExpireAt($key, $timestamp)
+    {
+        $retValue = false;
+        if ($this->isConnected()) {
+            $timestamp = (int)$timestamp;
+            $retValue = $this->connection->expireAt($this->realKey($key), $timestamp);
         }
 
         return $retValue;
