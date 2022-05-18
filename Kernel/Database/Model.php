@@ -98,7 +98,7 @@ abstract class Model
 
         $condition = self::parseCondRule($rule);
         if ($condition['where']) {
-            if ($this->isFieldInTable($this->updatedAtFieldName)) {
+            if ($this->isFieldInTable($this->updatedAtFieldName) && !isset($columns[$this->updatedAtFieldName])) {
                 $columns[$this->updatedAtFieldName] = time();
             }
             $ret = $this->dbConnection->update($this->getTable(), $columns, $condition['where']);
@@ -110,10 +110,10 @@ abstract class Model
     public function insert(array $columns)
     {
         $ret = false;
-        if ($this->isFieldInTable($this->createdAtFieldName)) {
+        if ($this->isFieldInTable($this->createdAtFieldName) && !isset($columns[$this->createdAtFieldName])) {
             $columns[$this->createdAtFieldName] = time();
         }
-        if ($this->isFieldInTable($this->updatedAtFieldName)) {
+        if ($this->isFieldInTable($this->updatedAtFieldName) && !isset($columns[$this->updatedAtFieldName])) {
             $columns[$this->updatedAtFieldName] = time();
         }
         if ($this->dbConnection->insert($this->getTable(), $columns)) {
