@@ -41,3 +41,4 @@ class Controller extends HttpController
         return parent::__call($method, [$command->getOptionValues()]);
     }
 }
+

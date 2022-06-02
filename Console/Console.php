@@ -163,4 +163,15 @@ class Console extends Application
         return $this->moduleName ?? envIniConfig('defaultModuleName', 'console');
     }
 
+    public static function echoSuccessMessage($message)
+    {
+        self::stdout(TermColor::addColor($message, TermColor::GREEN));
+    }
+
+    public static function echoFailureMessage($message)
+    {
+        self::stdout(TermColor::addColor($message, TermColor::RED));
+    }
+
 }
+

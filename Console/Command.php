@@ -278,3 +278,4 @@ class Command
         Console::stdout("$content\n");
     }
 }
+
