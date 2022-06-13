@@ -2,7 +2,7 @@
 namespace Qf\Kernel;
 
 /**
- * 运行期数据存储交换，支持完整数据类型
+ * 运行期数据存储，支持完整数据类型
  *
  * Class RuntimeContainer
  * @package Qf\Kernel
@@ -17,6 +17,17 @@ class RuntimeContainer
             self::$storage[$namespace] = [];
         }
         self::$storage[$namespace][$key] = $elem;
+    }
+
+    public static function push($key, $elem, $namespace = 'global')
+    {
+        if (!isset(self::$storage[$namespace])) {
+            self::$storage[$namespace] = [];
+        }
+        if (!isset(self::$storage[$namespace][$key])) {
+            self::$storage[$namespace][$key] = [];
+        }
+        self::$storage[$namespace][$key][] = $elem;
     }
 
     public static function get($key, $namespace = 'global', $default = null)
