@@ -154,27 +154,37 @@ class Response
      * @param array|null $domains 允许请求的域名，默认不限制
      * @param array|null $methods 允许请求的方式，GET、POST、OPTIONS、PUT、DELETE、HEAD等，默认不限制
      * @param array|null $headers 允许请求的头，默认不限制
-     * @param int $maxAge 在该时间内不需要再次进行预请求检查
+     * @param int|null $maxAge 在该时间内不需要再次进行预请求检查
+     * @param bool $isAllowCredentials 是否允许浏览器带上凭证(cookie)请求
+     * @param bool $isOverride 存在相同头部是否覆盖
      * @return $this
      */
-    public function setAllowCrossDomains(array $domains = null, array $methods = null, array $headers = null, $maxAge = 86400)
+    public function setAllowCrossDomains(array $domains = null, array $methods = null,
+                                         array $headers = null, $maxAge = null,
+                                         $isAllowCredentials = false, $isOverride = true)
     {
-        $domains = $domains ? join(', ', $domains) : '*';
-        $methods = $methods ? join(', ', $methods) : '*';
-        $headers = $headers ? join(', ', $headers) : '*';
-        
-        $this->setHeader('Access-Control-Allow-Origin', $domains);
-        if ($this->request->isRequestMethod('OPTIONS')) {
-            $this->setHeader('Access-Control-Allow-Headers', $headers);
-            $this->setHeader('Access-Control-Allow-Methods', $methods);
-            $this->setHeader('Access-Control-Max-Age', (int)$maxAge);
+        $headerFields = [
+            'Access-Control-Allow-Origin' => $domains ? join(',', $domains) : null,
+            'Access-Control-Allow-Credentials' => $isAllowCredentials,
+            'Access-Control-Allow-Headers' => $headers ? join(',', $headers) : null,
+            'Access-Control-Allow-Methods' => $methods ? join(',', $methods) : null,
+            'Access-Control-Max-Age' => !is_null($maxAge) ? (int)$maxAge : null,
+        ];
+        foreach ($headerFields as $key => $value) {
+            if ($value && ($isOverride || (!$isOverride && !isset($this->_headers[$key])))) {
+                if ($key == 'Access-Control-Allow-Origin' || $key == 'Access-Control-Allow-Credentials') {
+                    $this->setHeader($key, $value);
+                } elseif ($this->request->isRequestMethod('OPTIONS')) {
+                    $this->setHeader($key, $value);
+                }
+            }
         }
 
         return $this;
     }
 
     /**
-     * 根据.env配置设置cors跨域请求头部
+     * 根据.env设置cors跨域请求头部
      *
      * @return $this
      */
@@ -182,7 +192,17 @@ class Response
     {
         if ($this->request->isCors() && ($corsAllowDomains = envIniConfig('corsAllowDomains', 'http'))) {
             $corsAccessMaxAge = envIniConfig('corsAccessMaxAge', 'http', 86400);
-            $this->setAllowCrossDomains(explode(',', $corsAllowDomains), null, null, $corsAccessMaxAge);
+            $corsAllowHeaders = envIniConfig('corsAllowHeaders', 'http');
+            $corsAllowMethods = envIniConfig('corsAllowMethods', 'http');
+            $isAllowCredentials = envIniConfig('isAllowCredentials', 'http', false);
+            $this->setAllowCrossDomains(
+                explode(',', $corsAllowDomains),
+                $corsAllowMethods ? explode(',', $corsAllowMethods) : null,
+                $corsAllowHeaders ? explode(',', $corsAllowHeaders) : null,
+                $corsAccessMaxAge,
+                $isAllowCredentials,
+                false
+            );
         }
 
         return $this;
@@ -214,7 +234,7 @@ class Response
 
     public function setHeader($key, $value)
     {
-        $this->_headers[$key] = $value;
+        $this->_headers[$key] = "$value";
         return $this;
     }
 
