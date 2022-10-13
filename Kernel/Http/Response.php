@@ -172,7 +172,7 @@ class Response
         ];
         foreach ($headerFields as $key => $value) {
             if ($value && ($isOverride || (!$isOverride && !isset($this->_headers[$key])))) {
-                if ($key == 'Access-Control-Allow-Origin' || $key == 'Access-Control-Allow-Credentials') {
+                if ($key == 'Access-Control-Allow-Origin' || ($key == 'Access-Control-Allow-Credentials' && $value = 'true')) {
                     $this->setHeader($key, $value);
                 } elseif ($this->request->isRequestMethod('OPTIONS')) {
                     $this->setHeader($key, $value);
