@@ -136,6 +136,7 @@ class MysqlDistributedProvider extends Provider
                     $this->connection = $this->activedConnections[$this->connectionId];
                 } else {
                     $this->dbConfigFile = $tableConfig['dbConfigFile'];
+                    $this->isConnected = false;
                 }
             }
         }
