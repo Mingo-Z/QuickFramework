@@ -120,26 +120,32 @@ class MysqlDistributedProvider extends Provider
     public function getTable($tableKey)
     {
         static $tablesConfig = array();
-        $tableName = $tableKey;
+
         if (!$tablesConfig && $this->tablesConfigFile && is_readable($this->tablesConfigFile)) {
             $tablesConfig = require $this->tablesConfigFile;
         }
+        $tableName = $tableKey;
+        $connectionId = 'default';
+        $dbConfigFile = AppConfigsPath . 'servers/mysql/default.config.php';
         if (isset($tablesConfig[$tableKey])) {
             $tableConfig = $tablesConfig[$tableKey];
-            $tableName = isset($tableConfig['tableName']) ? $tableConfig['tableName'] : $tableKey;
-            $connectionId = isset($tableConfig['connectionId']) ? $tableConfig['connectionId'] : 'default';
-            $this->freeCntResult();
-            if (!$this->connection || $this->connectionId != $connectionId) {
-                $this->connectionId = $connectionId;
-                $this->connection = null;
-                if (isset($this->activedConnections[$this->connectionId])) {
-                    $this->connection = $this->activedConnections[$this->connectionId];
-                } else {
-                    $this->dbConfigFile = $tableConfig['dbConfigFile'];
-                    $this->isConnected = false;
-                }
+            $tableName = $tableConfig['tableName'] ?? $tableName;
+            $connectionId = $tableConfig['connectionId'] ?? $connectionId;
+            $dbConfigFile = $tableConfig['dbConfigFile'];
+        }
+
+        $this->freeCntResult();
+        if ($this->connectionId != $connectionId) {
+            $this->connectionId = $connectionId;
+            $this->connection = null;
+            if (isset($this->activedConnections[$this->connectionId])) {
+                $this->connection = $this->activedConnections[$this->connectionId];
+            } else {
+                $this->dbConfigFile = $dbConfigFile;
+                $this->isConnected = false;
             }
         }
+
         return $tableName;
     }
 
