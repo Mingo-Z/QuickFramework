@@ -29,7 +29,7 @@ class ServerSentEvents
      * @param int $retryInterval 客户端重连服务端时间间隔
      * @return string
      */
-    public function encodeMessage($content, $id = null, $event = null, $retryInterval = null)
+    public function encodeMessage($content = '', $id = null, $event = null, $retryInterval = null)
     {
         $message = null;
         if ($id) {
@@ -57,13 +57,23 @@ class ServerSentEvents
     }
 
     /**
-     * 响应ping请求，用于保持连接
+     * 响应客户端ping请求，用于保持连接
      *
      * @return string
      */
-    public function pong()
+    public function getPongEvent()
     {
         return $this->encodeMessage('', null, 'pong');
+    }
+
+    /**
+     * 通知客户端关闭连接
+     *
+     * @return string
+     */
+    public function getClosedEvent()
+    {
+        return $this->encodeMessage('', null, 'close');
     }
 
     /**

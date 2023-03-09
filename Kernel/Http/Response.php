@@ -342,9 +342,13 @@ class Response
         return $isCan;
     }
 
-    protected function _sendContent()
+    protected function _sendContent($isImmediately = false)
     {
         echo $this->isEncodeContentJson ? json_encode($this->content) : $this->content;
+        if ($isImmediately) {
+            ob_flush(); // 刷新PHP输出缓冲区
+            flush(); // 刷新系统缓冲区
+        }
         fastFinishFastCGIRequest();
     }
 
@@ -356,7 +360,7 @@ class Response
         die();
     }
 
-    public function send()
+    public function send($isImmediately = false)
     {
         if ($this->isProcessed()) {
             // 清除未通过return，直接输出到缓存冲区的内容
@@ -369,7 +373,7 @@ class Response
             }
             $this->_sendHeaders();
             if ($this->_isCanContent()) {
-                $this->_sendContent();
+                $this->_sendContent($isImmediately);
             }
         }
         return $this;
