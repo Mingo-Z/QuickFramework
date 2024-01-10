@@ -77,7 +77,11 @@ class HttpClient
         }
 
         if ($params) {
-            curl_setopt($curlHandle, CURLOPT_POST, true);
+            if ($method == self::REQUEST_METHOD_PUT || $method == self::REQUEST_METHOD_DELETE) {
+                curl_setopt($curlHandle, CURLOPT_CUSTOMREQUEST, $method);
+            } else {
+                curl_setopt($curlHandle, CURLOPT_POST, true);
+            }
             curl_setopt($curlHandle, CURLOPT_POSTFIELDS, $params); // If $params is an array, the Content-Type header will be set to multipart/form-data
         }
         if (!strncasecmp($url, 'https', 5)) {
