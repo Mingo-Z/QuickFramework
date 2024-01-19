@@ -9,7 +9,7 @@ return array_merge([
         'errlog' => [
             'className' => Qf\Components\Log\LogManager::class,
             'initProperties' => [
-                'runLogLevel' => Qf\Components\Log\LogManager::LOG_LEVEL_NOTICE,
+                'runLogLevel' => envIniConfig('errLogLevel', 'log', \Qf\Components\Log\LogManager::LOG_LEVEL_NOTICE),
                 'driverType' => 'file',
                 'options' => [
                     'storagePath' => envIniConfig('path', 'log', AppPath . 'logs/'),
@@ -35,7 +35,7 @@ return array_merge([
         'runlog' => [
             'className' => Qf\Components\Log\LogManager::class,
             'initProperties' => [
-                'runLogLevel' => Qf\Components\Log\LogManager::LOG_LEVEL_DEBUG,
+                'runLogLevel' => envIniConfig('runLogLevel', 'log', \Qf\Components\Log\LogManager::LOG_LEVEL_DEBUG),
                 'driverType' => 'file',
                 'options' => [
                     'storagePath' => envIniConfig('path', 'log', AppPath . 'logs/'),
@@ -46,7 +46,7 @@ return array_merge([
         'sqllog' => [
             'className' => Qf\Components\Log\LogManager::class,
             'initProperties' => [
-                'runLogLevel' => Qf\Components\Log\LogManager::LOG_LEVEL_DEBUG,
+                'runLogLevel' => envIniConfig('sqlLogLevel', 'log', \Qf\Components\Log\LogManager::LOG_LEVEL_DEBUG),
                 'driverType' => 'file',
                 'options' => [
                     'storagePath' => envIniConfig('path', 'log', AppPath . 'logs/'),
