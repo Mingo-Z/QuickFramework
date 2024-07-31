@@ -295,9 +295,10 @@ class MysqlDistributedProvider extends Provider
      *
      * @param string $sql
      * @param string $tableKey 表配置数组键名
-     * @return bool
+     * @param bool $returnResultObject 是否返回\mysqli_result对象
+     * @return bool|\mysqli_result
      */
-    public function query($sql, $tableKey = '')
+    public function query($sql, $tableKey = '', $returnResultObject = false)
     {
         if ($tableKey) {
             $tableName = $this->getTable($tableKey);
@@ -317,7 +318,23 @@ class MysqlDistributedProvider extends Provider
             }
         }
 
-        return $this->cntResult ? true : false;
+        return $this->cntResult ? ($returnResultObject ? $this->cntResult : true) : false;
+    }
+
+    /**
+     * 直接调用\mysqli_result::fetch_assoc
+     *
+     * @return false
+     */
+    public function rawFetchAssoc()
+    {
+        $ret = false;
+
+        if ($this->cntResult) {
+            $ret = $this->cntResult->fetch_assoc();
+        }
+
+        return $ret;
     }
 
     /**
